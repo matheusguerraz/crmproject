@@ -2,6 +2,13 @@
 
 {% block content %}
 <div class="container">
+    {% if request.GET.success %}
+    
+    {% with product_name=request.GET.product_name %}
+      {% include 'product_added.html' %}
+    {% endwith %}
+     
+    {% endif %}
     <table class="table table-bordered table-striped">
         <thead class="thead-dark">
             <tr>

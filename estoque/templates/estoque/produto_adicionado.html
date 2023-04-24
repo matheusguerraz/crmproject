@@ -1,0 +1,25 @@
+<div class="modal fade" id="success-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Produto salvo com sucesso</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>O produto {{ product_name }} foi salvo com sucesso!</p>
+          <i class="fas fa-check-circle fa-3x text-success"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+  $(document).ready(function() {
+    $("#success-modal").modal('show');
+    setTimeout(function(){
+      $('#success-modal').modal('hide');
+    }, 3000);
+  });
+  </script>
+  

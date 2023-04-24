@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib import messages
 from django.db.models import F
 from .models import Produto, Marca
@@ -65,15 +66,22 @@ def deletar_marca(request, pk):
 
 def cadastrar_produto(request):
     if request.method == 'POST':
-        form = EstoqueForm(request.POST)
-        if form.is_valid():
-            form.save()
-            mensagem = 'Produto cadastrado com sucesso!'
-            return render(request, 'estoque/cadastrar_produto.html', {'form': form, 'mensagem': mensagem})
+        # Processar formulário de cadastro de produto
+        product_form = EstoqueForm(request.POST)
+        if product_form.is_valid():
+            product = product_form.save()
+            product_name = product.produto
+            # Mensagem de sucesso para o usuário
+            messages.success(request, f"Produto '{product_name}' adicionado com sucesso!")
+            # Redirecionar para a página de listagem de produtos
+            return redirect(reverse('product_list') + '?success=true&product_name=' + product_name)
     else:
-        form = EstoqueForm()
-    return render(request, 'estoque/cadastrar_produto.html', {'form': form})
-
+        # Exibir formulário de cadastro de produto
+        product_form = EstoqueForm()
+    context = {
+        'form': product_form,
+    }
+    return render(request, 'produto_adicionado.html', context)
 
 
 def remover_produto(request, pk):
