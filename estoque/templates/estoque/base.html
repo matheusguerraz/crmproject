@@ -9,10 +9,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Menu dropdown</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js">
+  <link src="https://code.jquery.com/jquery-3.6.0.min.js">
 
-  <link rel="stylesheet" href="{% static 'css/main.css' %}" >
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
   
 </head>
 <body>
@@ -28,8 +28,8 @@
             Produtos
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            <a class="dropdown-item" href="index.html">Meus produtos</a>
-            <a class="dropdown-item" href="cadastrar_produto.html">Novo Produto</a>
+            <a class="dropdown-item" href="index">Meus produtos</a>
+            <a class="dropdown-item" href="cadastrar_produto">Novo Produto</a>
           </div>
         </li>
         <li class="nav-item dropdown">
@@ -37,8 +37,8 @@
             Marcas
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            <a class="dropdown-item" href="marca/listar_marcas.html">Minhas marcas</a>
-            <a class="dropdown-item" href="marca/cadastrar_marca.html">Nova Marca</a>
+            <a class="dropdown-item" href="listar_marcas">Minhas marcas</a>
+            <a class="dropdown-item" href="cadastrar_marca">Nova Marca</a>
           </div>
         </li>
       </ul>
@@ -49,6 +49,9 @@
 
 <!-- Importando Popper.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.3/umd/popper.min.js"></script>
+
+<!-- Importando JavaScript do Bootstrap -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 {% block content %}
 {% endblock %}
 </body>
