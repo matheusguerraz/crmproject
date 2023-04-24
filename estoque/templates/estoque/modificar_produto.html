@@ -1,0 +1,25 @@
+{% extends 'estoque/base.html' %}
+{% load widget_tweaks %}
+
+
+{% block content %}
+    <div class="container">
+        <h2>Editar Produto</h2>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="produto">Nome do Produto:</label>
+                <input type="text" class="form-control" id="produto" name="produto" value="{{ produto.produto }}">
+            </div>
+            <div class="form-group">
+                <label for="quantidade_em_estoque">Quantidade em Estoque:</label>
+                <input type="number" class="form-control" id="quantidade_em_estoque" name="quantidade_em_estoque" value="{{ produto.quantidade_em_estoque }}">
+            </div>
+            <div class="form-group">
+                <label for="estoque_minimo">Quantidade Mínima:</label>
+                <input type="number" class="form-control" id="estoque_minimo" name="estoque_minimo" value="{{ produto.estoque_minimo }}">
+            </div>
+            <button type="submit" class="btn btn-primary">Salvar</button>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'estoque/base.html' %}
+
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container">
+    <h1>Cadastrar Marca</h1>
+    <hr>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            {% render_field form.nome|attr:"class=form-control" %}
+        </div>
+        <div class="form-group">
+            {% render_field form.descricao|attr:"class=form-control" %}
+        </div>
+        <button type="submit" class="btn btn-primary">Cadastrar</button>
+    </form>
+    <div id="success-message" style="display: none;" class="alert alert-success">
+        Marca cadastrada com sucesso!
+    </div>
+</div>
+
+<script>
+    // Adiciona listener ao evento submit do formulário
+    document.querySelector('form').addEventListener('submit', function(event) {
+        event.preventDefault(); // Previne o comportamento padrão de submit do formulário
+
+        // Envia o formulário via AJAX
+        fetch(event.target.action, {
+            method: 'POST',
+            body: new FormData(event.target)
+        })
+        .then(response => {
+            if (response.ok) {
+                // Se a resposta for OK, exibe a mensagem de sucesso e redireciona para a lista de produtos
+                document.querySelector('#success-message').style.display = 'block';
+                setTimeout(function() {
+                    window.location.href = '/listar_produtos/';
+                }, 3000); // Redireciona para a lista de produtos após 3 segundos
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'estoque/base.html' %}
+
+{% block content %}
+<div class="container">
+  <h1>Lista de Marcas</h1>
+  <a href="{% url 'cadastrar_marca' %}" class="btn btn-primary mb-3">Cadastrar Marca</a>
+  {% if marcas %}
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nome</th>
+          <th>Descrição</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for marca in marcas %}
+          <tr>
+            <td>{{ marca.id }}</td>
+            <td>{{ marca.nome }}</td>
+            <td>{{ marca.descricao }}</td>
+            <td>
+              <a href="{% url 'editar_marca' marca.id %}" class="btn btn-sm btn-primary">Editar</a>
+              <a href="{% url 'deletar_marca' marca.id %}" class="btn btn-sm btn-danger">Excluir</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>Não há marcas cadastradas.</p>
+  {% endif %}
+</div>
+{% endblock %}

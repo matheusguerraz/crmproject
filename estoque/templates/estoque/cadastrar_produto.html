@@ -1,0 +1,80 @@
+{% extends 'estoque/base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+    <div class="container">
+        <h2>Cadastrar Produto</h2>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+                <div class="alert alert-danger" role="alert">
+                    <strong>Erro:</strong> Verifique os campos abaixo!
+                </div>
+            {% endif %}
+            
+            <div class="form-group">
+                <label for="{{ form.produto.id_for_label }}">Nome do Produto:</label>
+                {{ form.produto }}
+                {% if form.produto.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ form.produto.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.quantidade_em_estoque.id_for_label }}">Quantidade em Estoque:</label>
+                {{ form.quantidade_em_estoque }}
+                {% if form.quantidade_em_estoque.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ form.quantidade_em_estoque.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.estoque_minimo.id_for_label }}">Quantidade Mínima:</label>
+                {{ form.estoque_minimo }}
+                {% if form.estoque_minimo.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ form.estoque_minimo.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.descricao.id_for_label }}">Descrição:</label>
+                {{ form.descricao }}
+                {% if form.descricao.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ form.descricao.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+              <label for="{{ form.preco.id_for_label }}">Preço:</label>
+              {% render_field form.preco|attr:"class=form-control&data-mask=R$ ###.###.###,##" %}
+              {% if form.preco.errors %}
+                  <div class="alert alert-danger" role="alert">
+                      {{ form.preco.errors }}
+                  </div>
+              {% endif %}
+          </div>
+          
+
+            <div class="form-group">
+                <label for="{{ form.marca.id_for_label }}">Marca:</label>
+                {{ form.marca }}
+                {% if form.marca.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ form.marca.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary">Cadastrar</button>
+        </form>
+    </div>
+{% endblock %}

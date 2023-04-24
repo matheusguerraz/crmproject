@@ -1,0 +1,11 @@
+{% extends 'estoque/base.html' %}
+
+{% block content %}
+<form action="{% url 'deletar_marca' marca.pk %}?confirmado=True" method="post">
+    {% csrf_token %}
+    <p>Você tem certeza que deseja excluir a marca {{ marca.nome }}?</p>
+    <button type="submit">Confirmar</button>
+    <a href="{% url 'listar_marcas' %}">Cancelar</a>
+  </form>
+  
+{% endblock %}
