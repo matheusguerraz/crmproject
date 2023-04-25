@@ -21,6 +21,7 @@
             </tr>
         </thead>
         <tbody>
+          <img data-src="https://url-da-sua-imagem.com" alt="Minha imagem">
             {% for produto in produtos %}
             <tr>
                 <th scope="row">{{ produto.pk }}</th>
@@ -36,7 +37,34 @@
                 {% endif %}
             </tr>
             {% endfor %}
+            
         </tbody>
+        
     </table>
+    <div id="preview-image"></div>
 </div>
+
+{% block scripts %}
+<script>  
+// Seleciona todas as imagens com o atributo data-src
+const lazyImages = document.querySelectorAll('img[data-src]');
+
+// Função para carregar a imagem
+function loadImage(img) {
+  img.setAttribute('src', img.getAttribute('data-src'));
+  img.onload = () => {
+    img.removeAttribute('data-src');
+  };
+}
+
+// Loop através das imagens e carrega cada uma
+lazyImages.forEach((img) => {
+  loadImage(img);
+});
+
+</script>
+
+{% endblock %}
+
+
 {% endblock %}  

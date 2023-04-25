@@ -1,80 +1,202 @@
 {% extends 'estoque/base.html' %}
+{% load static %}
 {% load widget_tweaks %}
 
 {% block content %}
-    <div class="container">
-        <h2>Cadastrar Produto</h2>
-        <form method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            
-            {% if form.errors %}
-                <div class="alert alert-danger" role="alert">
-                    <strong>Erro:</strong> Verifique os campos abaixo!
-                </div>
-            {% endif %}
-            
-            <div class="form-group">
-                <label for="{{ form.produto.id_for_label }}">Nome do Produto:</label>
-                {{ form.produto }}
-                {% if form.produto.errors %}
-                    <div class="alert alert-danger" role="alert">
-                        {{ form.produto.errors }}
-                    </div>
-                {% endif %}
-            </div>
+<head>
 
-            <div class="form-group">
-                <label for="{{ form.quantidade_em_estoque.id_for_label }}">Quantidade em Estoque:</label>
-                {{ form.quantidade_em_estoque }}
-                {% if form.quantidade_em_estoque.errors %}
-                    <div class="alert alert-danger" role="alert">
-                        {{ form.quantidade_em_estoque.errors }}
-                    </div>
-                {% endif %}
-            </div>
+    <script src="https://cdn.jsdelivr.net/jquery.slick/1.6.0/slick.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/jquery.slick/1.6.0/slick.css"/>
+    <!-- Configuração do slider -->
+    <script type="text/javascript">
+    
+    $(document).ready(function(){
+        
+        $('.slider').slick({
+            dots: true, // exibe os pontos de navegação
+            infinite: true, // permite navegar infinitamente pelas imagens
+            speed: 500, // define a velocidade de transição das imagens
+            slidesToShow: 4, // exibe uma imagem por vez
+            adaptiveHeight: true // ajusta a altura do slider ao tamanho da imagem exibida
+        });
+    });
+</script>
+    <script type="text/JavaScript">
 
-            <div class="form-group">
-                <label for="{{ form.estoque_minimo.id_for_label }}">Quantidade Mínima:</label>
-                {{ form.estoque_minimo }}
-                {% if form.estoque_minimo.errors %}
-                    <div class="alert alert-danger" role="alert">
-                        {{ form.estoque_minimo.errors }}
-                    </div>
-                {% endif %}
-            </div>
+      function previewImage() {
+  const input = document.getElementById('input-imagem');
+  if (input.files && input.files.length) {
+    const slider = document.getElementById('preview-imagem'); // alteração aqui - selecionando o elemento que vai ser o slider
+    slider.innerHTML = ''; // alteração aqui - removendo o conteúdo anterior do slider
 
-            <div class="form-group">
-                <label for="{{ form.descricao.id_for_label }}">Descrição:</label>
-                {{ form.descricao }}
-                {% if form.descricao.errors %}
-                    <div class="alert alert-danger" role="alert">
-                        {{ form.descricao.errors }}
-                    </div>
-                {% endif %}
-            </div>
-            
-            <div class="form-group">
-              <label for="{{ form.preco.id_for_label }}">Preço:</label>
-              {% render_field form.preco|attr:"class=form-control&data-mask=R$ ###.###.###,##" %}
-              {% if form.preco.errors %}
-                  <div class="alert alert-danger" role="alert">
-                      {{ form.preco.errors }}
-                  </div>
-              {% endif %}
+    for (let i = 0; i < input.files.length; i++) {
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        const img = new Image();
+        img.src = e.target.result;
+
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+
+          canvas.width = 300;
+          canvas.height = 300;
+          ctx.drawImage(img, 0, 0, 300, 300);
+
+          const imgPreview = document.createElement('img');
+          imgPreview.src = canvas.toDataURL();
+          imgPreview.classList.add('preview-image');
+
+          const slide = document.createElement('div'); // alteração aqui - criando um novo elemento para cada imagem
+          slide.classList.add('slide');
+          slide.appendChild(imgPreview);
+          slider.appendChild(slide); // alteração aqui - adicionando o novo elemento ao slider
+
+          if (i === input.files.length - 1) {
+            // Inicialize o slider após todas as imagens serem adicionadas
+            $('.slider').slick({
+              slidesToShow: 1,
+              slidesToScroll: 1,
+              dots: true,
+              autoplay: true,
+              autoplaySpeed: 2000,
+            });
+          }
+        }
+      }
+
+      reader.readAsDataURL(input.files[i]);
+    }
+  }
+}
+
+
+        </script>   
+    </head>
+<body>
+<div class="container mt-4">
+  <h2>Cadastrar Produto</h2>
+  <div class="row">
+    <div class="col-lg-6">
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {% if form.errors %}
+          <div class="alert alert-danger" role="alert">
+            <strong>Erro:</strong> Verifique os campos abaixo!
           </div>
-          
+        {% endif %}
 
-            <div class="form-group">
-                <label for="{{ form.marca.id_for_label }}">Marca:</label>
-                {{ form.marca }}
-                {% if form.marca.errors %}
-                    <div class="alert alert-danger" role="alert">
-                        {{ form.marca.errors }}
-                    </div>
-                {% endif %}
+        <div class="form-group">
+          <label for="{{ form.produto.id_for_label }}">Nome do Produto:</label>
+          {{ form.produto|attr:"class=form-control" }}
+          {% if form.produto.errors %}
+            <div class="alert alert-danger" role="alert">
+              {{ form.produto.errors }}
             </div>
+          {% endif %}
+        </div>
 
-            <button type="submit" class="btn btn-primary">Cadastrar</button>
-        </form>
-    </div>
-{% endblock %}
+        <div class="form-group">
+          <label for="{{ form.quantidade_em_estoque.id_for_label }}">Quantidade em Estoque:</label>
+          {{ form.quantidade_em_estoque|attr:"class=form-control" }}
+          {% if form.quantidade_em_estoque.errors %}
+            <div class="alert alert-danger" role="alert">
+              {{ form.quantidade_em_estoque.errors }}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.estoque_minimo.id_for_label }}">Quantidade Mínima:</label>
+          {{ form.estoque_minimo|attr:"class=form-control" }}
+          {% if form.estoque_minimo.errors %}
+            <div class="alert alert-danger" role="alert">
+              {{ form.estoque_minimo.errors }}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.sabor.id_for_label }}">Sabor:</label>
+          {{ form.sabor|attr:"class=form-control" }}
+          {% if form.sabor.errors %}
+            <div class="alert alert-danger" role="alert">
+              {{ form.sabor.errors }}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.descricao.id_for_label }}">Descrição:</label>
+          {{ form.descricao|attr:"class=form-control" }}
+          {% if form.descricao.errors %}
+            <div class="alert alert-danger" role="alert">
+              {{ form.descricao.errors }}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.preco.id_for_label }}">Preço:</label>
+            <input type="text" class="form-control" id="preco" onkeypress="$(this).mask('R$ 000,00')">
+            {% if form.preco.errors %}
+              <div class="alert alert-danger" role="alert">
+                {{ form.preco.errors }}
+              </div>
+            {% endif %}
+          </div>
+        
+
+        <div class="form-group">
+          <label for="{{ form.marca.id_for_label }}">Marca:</label>
+          {{ form.marca|attr:"class=form-control" }}
+          {% if form.marca.errors %}
+            <div class="alert alert-danger" role="alert">
+              {{ form.marca.errors }}
+            </div>
+          {% endif %}
+        </div>
+
+        <label for="{{ form.imagem.id_for_label }}">Imagem:</label>
+        <input type="file" name="imagem" id="input-imagem" accept="image/*" onchange="previewImage()" multiple>
+      
+        {% if form.imagem.errors %}
+          <div class="alert alert-danger" role="alert">
+            {{ form.imagem.errors }}
+          </div>
+        {% endif %}
+
+        <div class="slider" id="preview-imagem"></div>
+        {% for imagem in imagens %}
+          <img src="{{ imagem.url }}" alt="{{ imagem.name }}">
+        {% endfor %}
+      </div>
+
+        </div>
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary">Salvar</button>
+            <a href="{% url 'index' %}" class="btn btn-secondary">Cancelar</a>
+          </div>
+            </form>
+          </div>
+          </div>
+      <script type="text/javascript" src="{% static 'js/jquery-1.11.1.min.js' %}"></script> 
+      <script type="text/javascript" src="{% static 'js/jquery.mask.js' %}"></script> 
+
+      <script type="text/javascript">
+        $(document).ready(function(){
+          //R$ 000,00
+          $('#preco').mask('R$ 000,00');
+          
+        });
+      </script>
+
+</body>
+          {% endblock %}
+          {% block scripts %}
+
+
+          {% endblock %}
+          

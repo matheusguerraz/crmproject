@@ -6,6 +6,8 @@ from .models import Produto, Marca
 from widget_tweaks.templatetags import widget_tweaks
 from .forms import EstoqueForm, MarcaForm
 from django.contrib.auth.decorators import login_required
+from PIL import Image
+from django.core.files.base import ContentFile
 
 def index(request):
     produtos = Produto.objects.all()
@@ -67,9 +69,22 @@ def deletar_marca(request, pk):
 def cadastrar_produto(request):
     if request.method == 'POST':
         # Processar formulário de cadastro de produto
-        product_form = EstoqueForm(request.POST)
+        product_form = EstoqueForm(request.POST, request.FILES)
         if product_form.is_valid():
+            images = request.FILES.getlist('imagens')
+            for image in images:
+                img = Image.open(image)
+                output_size = (300, 300) # Define aqui o tamanho que você quer redimensionar
+                img.thumbnail(output_size)
+                # Salvar a imagem redimensionada
+                thumb_io = BytesIO()
+                img.save(thumb_io, img.format, quality=85)
+                thumb_io.seek(0)
+                image = ContentFile(thumb_io.getvalue(), name=image.name)
+                # Atualizar o form com a imagem redimensionada
+                product_form.cleaned_data['imagens'] = image
             product = product_form.save()
+            sabor = request.POST['sabor']
             product_name = product.produto
             # Mensagem de sucesso para o usuário
             messages.success(request, f"Produto '{product_name}' adicionado com sucesso!")
@@ -81,7 +96,7 @@ def cadastrar_produto(request):
     context = {
         'form': product_form,
     }
-    return render(request, 'produto_adicionado.html', context)
+    return render(request, 'estoque/cadastrar_produto.html', context)
 
 
 def remover_produto(request, pk):

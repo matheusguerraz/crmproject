@@ -83,7 +83,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'dbproduct',
         'USER': 'root',
-        'PASSWORD': '****',
+        'PASSWORD': 'Zmth12*03',
         'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS':{
@@ -129,6 +129,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'estoque', 'static')]
+
+
+STATIC_ROOT = BASE_DIR / Path('staticfiles')
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
