@@ -7,7 +7,6 @@ class EstoqueForm(forms.ModelForm):
     class Meta:
         model = Produto
         fields = ('produto','descricao','sabor','imagem', 'preco','marca', 'quantidade_em_estoque', 'estoque_minimo')
-        exclude = []
 
 class MarcaForm(forms.ModelForm):
 

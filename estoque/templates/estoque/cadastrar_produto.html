@@ -4,72 +4,57 @@
 
 {% block content %}
 <head>
-
-    <script src="https://cdn.jsdelivr.net/jquery.slick/1.6.0/slick.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/jquery.slick/1.6.0/slick.css"/>
-    <!-- Configuração do slider -->
-    <script type="text/javascript">
     
-    $(document).ready(function(){
-        
-        $('.slider').slick({
-            dots: true, // exibe os pontos de navegação
-            infinite: true, // permite navegar infinitamente pelas imagens
-            speed: 500, // define a velocidade de transição das imagens
-            slidesToShow: 4, // exibe uma imagem por vez
-            adaptiveHeight: true // ajusta a altura do slider ao tamanho da imagem exibida
-        });
-    });
-</script>
-    <script type="text/JavaScript">
 
-      function previewImage() {
-  const input = document.getElementById('input-imagem');
-  if (input.files && input.files.length) {
-    const slider = document.getElementById('preview-imagem'); // alteração aqui - selecionando o elemento que vai ser o slider
-    slider.innerHTML = ''; // alteração aqui - removendo o conteúdo anterior do slider
+      <script type="text/JavaScript">
 
-    for (let i = 0; i < input.files.length; i++) {
-      const reader = new FileReader();
+        function previewImage() {
+    const input = document.getElementById('input-imagem');
+    if (input.files && input.files.length) {
+      const slider = document.getElementById('preview-imagem'); // alteração aqui - selecionando o elemento que vai ser o slider
+      slider.innerHTML = ''; // alteração aqui - removendo o conteúdo anterior do slider
 
-      reader.onload = function(e) {
-        const img = new Image();
-        img.src = e.target.result;
+      for (let i = 0; i < input.files.length; i++) {
+        const reader = new FileReader();
 
-        img.onload = function() {
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
+        reader.onload = function(e) {
+          const img = new Image();
+          img.src = e.target.result;
 
-          canvas.width = 300;
-          canvas.height = 300;
-          ctx.drawImage(img, 0, 0, 300, 300);
+          img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
 
-          const imgPreview = document.createElement('img');
-          imgPreview.src = canvas.toDataURL();
-          imgPreview.classList.add('preview-image');
+            canvas.width = 300;
+            canvas.height = 300;
+            ctx.drawImage(img, 0, 0, 300, 300);
 
-          const slide = document.createElement('div'); // alteração aqui - criando um novo elemento para cada imagem
-          slide.classList.add('slide');
-          slide.appendChild(imgPreview);
-          slider.appendChild(slide); // alteração aqui - adicionando o novo elemento ao slider
+            const imgPreview = document.createElement('img');
+            imgPreview.src = canvas.toDataURL();
+            imgPreview.classList.add('preview-image');
 
-          if (i === input.files.length - 1) {
-            // Inicialize o slider após todas as imagens serem adicionadas
-            $('.slider').slick({
-              slidesToShow: 1,
-              slidesToScroll: 1,
-              dots: true,
-              autoplay: true,
-              autoplaySpeed: 2000,
-            });
+            const slide = document.createElement('div'); // alteração aqui - criando um novo elemento para cada imagem
+            slide.classList.add('slide');
+            slide.appendChild(imgPreview);
+            slider.appendChild(slide); // alteração aqui - adicionando o novo elemento ao slider
+
+            if (i === input.files.length - 1) {
+              // Inicialize o slider após todas as imagens serem adicionadas
+              $('#preview-imagem').slick({
+                slidesToShow: 1,
+                slidesToScroll: 1,
+                dots: true,
+                autoplay: true,
+                autoplaySpeed: 2000,
+              });
+            }
           }
         }
-      }
 
-      reader.readAsDataURL(input.files[i]);
+        reader.readAsDataURL(input.files[i]);
+      }
     }
   }
-}
 
 
         </script>   
@@ -139,14 +124,17 @@
         </div>
 
         <div class="form-group">
-            <label for="{{ form.preco.id_for_label }}">Preço:</label>
-            <input type="text" class="form-control" id="preco" onkeypress="$(this).mask('R$ 000,00')">
-            {% if form.preco.errors %}
-              <div class="alert alert-danger" role="alert">
-                {{ form.preco.errors }}
-              </div>
-            {% endif %}
-          </div>
+          <label for="{{ form.preco.id_for_label }}">Preço:</label>
+          {{ form.preco|attr:"class=form-control" }}
+          {% if form.preco.errors %}
+            <div class="alert alert-danger" role="alert">
+              {{ form.preco.errors }}
+            </div>
+          {% endif %}
+        </div>
+        
+
+        
         
 
         <div class="form-group">
@@ -160,20 +148,30 @@
         </div>
 
         <label for="{{ form.imagem.id_for_label }}">Imagem:</label>
-        <input type="file" name="imagem" id="input-imagem" accept="image/*" onchange="previewImage()" multiple>
-      
+        <input type="file" name="imagem" id="input-imagem" accept="image/*" multiple>
+        
         {% if form.imagem.errors %}
           <div class="alert alert-danger" role="alert">
             {{ form.imagem.errors }}
           </div>
         {% endif %}
-
-        <div class="slider" id="preview-imagem"></div>
+        
+        <div id="slider-imagem"></div>
         {% for imagem in imagens %}
           <img src="{{ imagem.url }}" alt="{{ imagem.name }}">
         {% endfor %}
-      </div>
-
+        
+        <script type="text/javascript">
+          $(document).ready(function(){
+            $('#preview-imagem').slick({
+              dots: true,
+              infinite: true,
+              speed: 500,
+              slidesToShow: 4,
+              adaptiveHeight: true
+            });
+          });
+        </script>
         </div>
           <div class="form-group">
             <button type="submit" class="btn btn-primary">Salvar</button>
@@ -184,14 +182,8 @@
           </div>
       <script type="text/javascript" src="{% static 'js/jquery-1.11.1.min.js' %}"></script> 
       <script type="text/javascript" src="{% static 'js/jquery.mask.js' %}"></script> 
-
-      <script type="text/javascript">
-        $(document).ready(function(){
-          //R$ 000,00
-          $('#preco').mask('R$ 000,00');
-          
-        });
-      </script>
+      <script src="https://cdn.jsdelivr.net/jquery.slick/1.6.0/slick.min.js"></script>
+      <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/jquery.slick/1.6.0/slick.css"/>
 
 </body>
           {% endblock %}
