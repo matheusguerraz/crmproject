@@ -1,11 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse
 from django.contrib import messages
 from django.db.models import F
 from .models import Produto, Marca
-from widget_tweaks.templatetags import widget_tweaks
-from .forms import EstoqueForm, MarcaForm
+from .forms import EstoqueForm, MarcaForm, ProdutoImagemForm
 from django.contrib.auth.decorators import login_required
+
 
 def index(request):
     produtos = Produto.objects.all()
@@ -64,24 +63,7 @@ def deletar_marca(request, pk):
         return render(request, 'marca/confirmar_exclusao_marca.html', {'marca': marca_para_deletar})
 
 
-def cadastrar_produto(request):
-    if request.method == 'POST':
-        # Processar formulário de cadastro de produto
-        product_form = EstoqueForm(request.POST)
-        if product_form.is_valid():
-            product = product_form.save()
-            product_name = product.produto
-            # Mensagem de sucesso para o usuário
-            messages.success(request, f"Produto '{product_name}' adicionado com sucesso!")
-            # Redirecionar para a página de listagem de produtos
-            return redirect(reverse('product_list') + '?success=true&product_name=' + product_name)
-    else:
-        # Exibir formulário de cadastro de produto
-        product_form = EstoqueForm()
-    context = {
-        'form': product_form,
-    }
-    return render(request, 'produto_adicionado.html', context)
+
 
 
 def remover_produto(request, pk):
@@ -110,3 +92,35 @@ def produtos_em_falta(request):
     todos_produtos = Produto.objects.all()
     produtos_em_falta = todos_produtos.filter(quantidade_em_estoque__lte = F('estoque_minimo'))
     return render(request, 'estoque/index.html', {'produtos': produtos_em_falta})
+
+def cadastrar_produto(request):
+    if request.method == 'POST':
+        produto_form = EstoqueForm(request.POST)
+        imagem_form = ProdutoImagemForm(request.POST, request.FILES)
+        if produto_form.is_valid() and imagem_form.is_valid():
+            produto = produto_form.save(commit=False)
+            produto.save()
+            imagem = imagem_form.save(commit=False)
+            imagem.produto = produto
+            imagem.save()
+            mensagem = 'Produto adicionado com sucesso!'
+            response = redirect('index')
+            response.set_cookie('produto_adicionado', mensagem)
+            return response
+    else:
+        produto_form = EstoqueForm()
+        imagem_form = ProdutoImagemForm()
+    return render(request, 'estoque/cadastrar_produto.html', {'produto_form': produto_form, 'imagem_form': imagem_form})
+
+    
+
+def index(request):
+    produtos = Produto.objects.all()
+    produto_adicionado = request.COOKIES.get('produto_adicionado', False)
+    response = render(request, 'estoque/index.html', {'produtos': produtos, 'produto_adicionado': produto_adicionado})
+    
+    if produto_adicionado:
+        response.delete_cookie('produto_adicionado')
+    return response
+
+

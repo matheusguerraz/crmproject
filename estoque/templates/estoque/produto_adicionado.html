@@ -1,25 +1,72 @@
-<div class="modal fade" id="success-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Produto salvo com sucesso</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <p>O produto {{ product_name }} foi salvo com sucesso!</p>
-          <i class="fas fa-check-circle fa-3x text-success"></i>
-        </div>
+
+{% load static %}
+<head>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/modal_save_product.css' %}">
+</head>
+<div>
+  {% if 'produto_adicionado' in request.COOKIES %}
+      <div class="modal" tabindex="-1" role="dialog" id="success-modal">
+          <div class="modal-backdrop"></div>
+          <div class="container">
+              <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                      <div class="modal-header">
+                          <h5 class="modal-title">Produto adicionado com sucesso!</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                          </button>
+                      </div>
+                      <div class="modal-body">
+                          O produto {{produto.name}} foi adicionado com sucesso ao estoque!
+                      </div>
+                  </div>
+              </div>
+          </div>
       </div>
-    </div>
-  </div>
+
+  {% endif %}
+  <body>
+  {% block scripts %}
   <script>
-  $(document).ready(function() {
-    $("#success-modal").modal('show');
-    setTimeout(function(){
-      $('#success-modal').modal('hide');
-    }, 3000);
-  });
+      document.addEventListener('DOMContentLoaded', function() {
+          console.log
+          // seleciona a modal
+          const modal = document.querySelector('#success-modal');
+
+          // define a função para remover a classe CSS que esconde a modal
+          const hideModal = () => {
+              modal.classList.remove('show');
+              modal.classList.add('hide');
+          };
+
+          // adiciona evento de clique ao botão de fechar
+          const closeButton = modal.querySelector('.close');
+          closeButton.addEventListener('click', hideModal);
+
+          // adiciona evento de clique ao fundo escuro
+          const backdrop = modal.querySelector('.modal-backdrop');
+          backdrop.addEventListener('click', hideModal);
+
+          // define a função para esconder a modal após 3 segundos
+          const hideModalDelayed = () => {
+              modal.classList.add('show');
+              setTimeout(hideModal, 3000);
+          };
+
+          // verifica se o cookie 'produto_adicionado' existe e exibe a modal caso exista
+          const cookieValue = document.cookie.replace(/(?:(?:^|.*;\s*)produto_adicionado\s*\=\s*([^;]*).*$)|^.*$/, '$1');
+          if (cookieValue === 'true') {
+              hideModalDelayed();
+              document.cookie = 'produto_adicionado=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+          }
+      });
+
+      window.addEventListener('load', function() {
+          // excluindo o cookie para não exibir novamente em reloads
+          setTimeout(function() {
+              document.cookie = 'produto_adicionado=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+          }, 5000); // remove o cookie depois de 5 segundos
+      });
   </script>
-  
+{% endblock %}
+</body>

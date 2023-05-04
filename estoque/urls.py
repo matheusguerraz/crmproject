@@ -8,8 +8,10 @@ urlpatterns = [
     path('produtos_em_falta/', views.produtos_em_falta, name='produtos_em_falta'),#DONE
     path('add_produto/', views.cadastrar_produto, name='add_produto'),
 
-    path('cadastrar_marca/', views.cadastrar_marca, name='cadastrar_marca'),
     path('listar_marcas/', views.listar_marcas, name='listar_marcas'),
     path('editar_marca/<int:pk>/', views.editar_marca, name='editar_marca'),
     path('deletar_marca/<int:pk>/', views.deletar_marca, name='deletar_marca'),
+    path('cadastrar_marca/', views.cadastrar_marca, name='cadastrar_marca'),
+
+
 ]

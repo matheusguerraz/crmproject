@@ -1,0 +1,29 @@
+.thumbnail {
+    border: none;
+    background-color: #fff;
+    text-align: center;
+    box-shadow: 0px 0px 8px 0px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.thumbnail img {
+    height: 200px;
+    margin-bottom: 20px;
+}
+
+.thumbnail h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.thumbnail p {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.thumbnail .btn {
+    font-size: 16px;
+    padding: 8px 16px;
+    margin-top: 10px;
+}
