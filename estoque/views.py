@@ -1,17 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db.models import F
-from .models import Produto, Marca
+from .models import Produto, Marca, ProdutoImagem
 from .forms import EstoqueForm, MarcaForm, ProdutoImagemForm
 from django.contrib.auth.decorators import login_required
 
-
-def index(request):
-    produtos = Produto.objects.all()
-    return render(request, 'estoque/index.html', {'produtos': produtos})
-
 # Funções do CRUD da marca do sistema
-
 def cadastrar_marca(request):
     if request.method == 'POST':
         form = MarcaForm(request.POST)
@@ -74,19 +68,23 @@ def remover_produto(request, pk):
 
 def modificar_produto(request, pk):
     produto_para_modificar = get_object_or_404(Produto, pk=pk)
+    imagem_para_modificar = produto_para_modificar.imagem_produto
     if request.method == 'POST':
         form = EstoqueForm(request.POST, instance=produto_para_modificar)
-        if form.is_valid():
+        imagem_form = ProdutoImagemForm(request.POST, request.FILES, instance=imagem_para_modificar)
+        if form.is_valid() and imagem_form.is_valid():
             produto_para_modificar = form.save(commit=False)
-            produto_para_modificar.produto = form.cleaned_data['produto']
-            produto_para_modificar.quantidade_em_estoque = form.cleaned_data['quantidade_em_estoque']
-            produto_para_modificar.estoque_minimo = form.cleaned_data['estoque_minimo']
             produto_para_modificar.save()
+            imagem_para_modificar = imagem_form.save(commit=False)
+            imagem_para_modificar.produto = produto_para_modificar
+            imagem_para_modificar.save()
             messages.success(request, f'O produto {produto_para_modificar.produto} foi alterado com sucesso!')
             return redirect('index')
     else:
         form = EstoqueForm(instance=produto_para_modificar)
-    return render(request, 'estoque/modificar_produto.html', {'produto': produto_para_modificar, 'form': form})
+        imagem_form = ProdutoImagemForm(instance=imagem_para_modificar)
+    return render(request, 'estoque/modificar_produto.html', {'produto': produto_para_modificar, 'form': form, 'imagem_form': imagem_form})
+
 
 def produtos_em_falta(request):
     todos_produtos = Produto.objects.all()
@@ -98,15 +96,15 @@ def cadastrar_produto(request):
         produto_form = EstoqueForm(request.POST)
         imagem_form = ProdutoImagemForm(request.POST, request.FILES)
         if produto_form.is_valid() and imagem_form.is_valid():
-            produto = produto_form.save(commit=False)
+            produto = produto_form.save()
             produto.save()
-            imagem = imagem_form.save(commit=False)
-            imagem.produto = produto
-            imagem.save()
+            for imagem in request.FILES.getlist('imagem'):
+                ProdutoImagem.objects.create(imagem=imagem, produto=produto)
             mensagem = 'Produto adicionado com sucesso!'
-            response = redirect('index')
-            response.set_cookie('produto_adicionado', mensagem)
-            return response
+            messages.success(request, mensagem)
+            return redirect('index')
+        else:
+            messages.error(request, "Houve um erro ao adicionar o produto. Verifique os campos abaixo.")
     else:
         produto_form = EstoqueForm()
         imagem_form = ProdutoImagemForm()
