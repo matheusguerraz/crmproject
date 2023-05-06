@@ -4,6 +4,9 @@ from django.db.models import F
 from .models import Produto, Marca, ProdutoImagem
 from .forms import EstoqueForm, MarcaForm, ProdutoImagemForm
 from django.contrib.auth.decorators import login_required
+from PIL import Image
+from io import BytesIO
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 # Funções do CRUD da marca do sistema
 def cadastrar_marca(request):
@@ -99,7 +102,18 @@ def cadastrar_produto(request):
             produto = produto_form.save()
             produto.save()
             for imagem in request.FILES.getlist('imagem'):
-                ProdutoImagem.objects.create(imagem=imagem, produto=produto)
+                # Redimensionar imagem
+                img = Image.open(imagem)
+                output = BytesIO()
+                img_resized = img.resize((800, 600), resample=Image.LANCZOS)
+                img_resized.save(output, format='JPEG', quality=100)
+                output.seek(0)
+
+                # Salvar imagem redimensionada
+                ProdutoImagem.objects.create(imagem=InMemoryUploadedFile(
+                    output, 'ImageField', f"{imagem.name.split('.')[0]}_resized.jpg", 'image/jpeg', output.getbuffer().nbytes, None),
+                    produto=produto)
+
             mensagem = 'Produto adicionado com sucesso!'
             messages.success(request, mensagem)
             return redirect('index')

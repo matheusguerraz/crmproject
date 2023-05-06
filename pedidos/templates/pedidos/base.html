@@ -1,11 +1,12 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-  {% load static %}
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Meu Site{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <!DOCTYPE html>
+  <html lang="pt-br">
+    {% load static %}
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>{% block title %}Guerra Suplementos{% endblock %}</title>
+      <link rel="stylesheet" href="{% static 'css/base.css' %}">
+      <link rel="stylesheet" href="{% static 'css/header.css' %}">
     <!-- jQuery library -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Importando JavaScript do Bootstrap -->
@@ -16,101 +17,56 @@
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
   </head> 
   <body>
-    <div class="'container">
-      
-      <head>
-        <meta charset="UTF-8">
-        <title>Minha Página</title>
-        <link rel="stylesheet" type="text/css">
-      </head>
-      <body>
-        <header>
-          <nav>
-            <ul>
-              <li><a href="#">Início</a></li>
-              <li><a href="#">Sobre</a></li>
-              <li><a href="#">Contato</a></li>
-            </ul>
-          </nav>
-        </header>
-    <main>
-      {% block content %}
-      <div class="container">
-        <div class="product-grid">
-          {% for produto in produtos %}
-          <div class="product-item">
-            <a href="{% url 'detalhes_produto' produto.id %}">
-              <div class="col-md-6"> 
-                {% if produto.imagem %}
-                <img src="{{ produto.imagem.url }}" class="img-fluid" alt="{{ produto.produto }}">
-                {% else %}
-                <p>Este produto não tem imagem associada</p>
-                {% endif %}
-              </div>
-              <div class="product-info">
-                <h2>{{ produto.produto }}</h2>
-                <p>Preço: R$ {{ produto.preco }}</p>
-              </div>
-            </a>
-            <button class="buy-button" data-produto-id="{{ produto.id }}">Comprar</button>
-          </div>
-          {% endfor %}
-          <script>
-            var csrf_token = $('input[name="csrfmiddlewaretoken"]').val();
-            $.ajax({
-                //...
-                headers: { "X-CSRFToken": csrf_token },
-                //...
-            });
-            $(document).ready(function() {
-              $('.buy-button').click(function(event) {
-                event.preventDefault();
-                var productId = $(this).data('produto-id');
-                $.ajax({
-                  url: '/adicionar-ao-carrinho/',
-                  method: 'POST',
-                  data: {product_id: productId},
-                  success: function(data) {
-                    alert('Produto adicionado ao carrinho com sucesso!');
-                  },
-                  error: function() {
-                    alert('Ocorreu um erro ao adicionar o produto ao carrinho!');
-                  }
-                });
-              });
-            });
-            </script>
+    <header>
+      <div class="header-top">
+        <div class="header-left">
+          <form action="#" class="search-bar">
+            <input type="text" placeholder="Busca">
+            <button type="submit"><i class="fas fa-search"></i></button>
+          </form>
+          <a href="#" class="account-link">Entre</a>
+          <a href="#" class="account-link">Crie sua conta</a>
+        </div>
+        <div class="header-right">
+          <a href="#" class="cart-link"><i class="fas fa-shopping-cart"></i></a>
         </div>
       </div>
-      {% endblock %}
-    </main>
-    <footer class="fixed-bottom bg-light py-3">
-      <div class="container">
-        <p class="text-center text-muted">&copy; 2023. Todos os direitos reservados.</p>
+      <div class="header-bottom">
+        <nav class="product-filters">
+          <ul>
+            <li><a href="#">Whey</a></li>
+            <li><a href="#">Pré treino</a></li>
+            <li><a href="#">Hipercalórico</a></li>
+            <li><a href="#">Pasta de amendoim</a></li>
+          </ul>
+        </nav>
       </div>
-    </footer>
-
-    <!-- Modal do carrinho -->
-    <div class="modal fade" id="carrinhoModal" tabindex="-1" aria-labelledby="carrinhoModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="carrinhoModalLabel">Meu Carrinho</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </header>
+<main>
+  {% block content %}
+  <div class="container">
+    <div class="product-grid">
+      {% for produto in produtos %}
+      <div class="product-item">
+        <a href="{% url 'detalhes_produto' produto.id %}">
+          <div class="product-image"> 
+            {% if produto.imagem %}
+            <img src="{{ produto.imagem.url }}" alt="{{ produto.produto }}">
+            {% else %}
+            <p>Este produto não tem imagem associada</p>
+            {% endif %}
           </div>
-          <div class="modal-body">
-            <ul id="carrinho-itens">
-            </ul>
+          <div class="product-info">
+            <h2>{{ produto.produto }}</h2>
+            <p>Preço: R$ {{ produto.preco }}</p>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-            <a href="{% url 'faz_pedido' %}" class="btn btn-primary">Finalizar pedido</a>
-          </div>
-        </div>
+        </a>
+        <button class="buy-button" data-produto-id="{{ produto.id }}">Comprar</button>
       </div>
+      {% endfor %}
     </div>
-
   </div>
+  {% endblock %}
+</main>
   </body>
 </html>
-

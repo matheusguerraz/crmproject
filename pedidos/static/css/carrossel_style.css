@@ -1,0 +1,40 @@
+.carousel-container {
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+  }
+  
+  .carousel-images {
+    display: flex;
+    width: 300%;
+    height: 100%;
+    transition: transform 0.5s ease-in-out;
+  }
+  
+  .carousel-images img {
+    width: 33.33%;
+    height: 100%;
+  }
+  
+  .carousel-images img:nth-child(1) {
+    background-color: red;
+  }
+  
+  .carousel-images img:nth-child(2) {
+    background-color: blue;
+  }
+  
+  .carousel-images img:nth-child(3) {
+    background-color: green;
+  }
+  
+  /* Para mover as imagens para a esquerda (slide para a direita) */
+  .carousel-images.slide-right {
+    transform: translateX(-100%);
+  }
+  
+  /* Para mover as imagens para a direita (slide para a esquerda) */
+  .carousel-images.slide-left {
+    transform: translateX(-200%);
+  }
+  

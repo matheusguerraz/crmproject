@@ -1,6 +1,6 @@
 
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Produto, Pedido, ItemPedido, Carrinho, ItemCarrinho
+from .models import Produto, Pedido, ItemPedido, Carrinho, ItemCarrinho, ProdutoImagem
 from .forms import PedidoForm
 from django.http import JsonResponse
 from django.template.loader import render_to_string
@@ -12,7 +12,8 @@ from django.utils.decorators import method_decorator
 def lista_produtos(request):
     form = ItemCarrinho()
     produtos = Produto.objects.filter(quantidade_em_estoque__gt=0)
-    return render(request, 'pedidos/product_list.html', {'produtos': produtos, 'form': form})
+    imagens = ProdutoImagem.objects .all()
+    return render(request, 'pedidos/product_list.html', {'produtos': produtos,'imagens': imagens ,'form': form})
 
 
 
