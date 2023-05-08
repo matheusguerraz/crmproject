@@ -50,4 +50,20 @@
                     </div>
                 {% endif %}
             </div>
+
+            <div class="form-group">
+                {{ imagem_form.as_p }}
+
+                <button type="submit">Salvar Alterações</button>
+              </form>
+            
+              {% if produto.produtoimagem_set.exists %}
+                <h2>Imagens associadas ao produto</h2>
+                {% for imagem in produto.produtoimagem_set.all %}
+                  <img src="{{ imagem.imagem.url }}" alt="Imagem do produto">
+                {% endfor %}
+              {% else %}
+                <p>Produto sem imagens associadas</p>
+              {% endif %}
+            </div>
 {% endblock %}

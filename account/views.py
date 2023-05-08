@@ -4,15 +4,21 @@ from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
-from .forms import CustomUserCreationForm
+from .forms import CustomUserCreationForm, LoginForm
 from .models import CustomUser
+from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import render, redirect
+from django.urls import reverse
+import hashlib
+from passlib.hash import pbkdf2_sha256
+import os
 
 
 class SignUpView(CreateView):
     model = CustomUser
     template_name = 'account/index.html'
     form_class = CustomUserCreationForm
-    success_url = reverse_lazy('login')
+    success_url = reverse_lazy('lista_produtos')
 
     def form_invalid(self, form):
         errors = {}
@@ -38,7 +44,6 @@ class SignUpView(CreateView):
         except ValidationError as e:
             errors.update({'email': [e.message]})
 
-
         if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({'error': errors})
         else:
@@ -51,8 +56,22 @@ class SignUpView(CreateView):
                 messages.error(self.request, form.errors['non_field_errors'][0])
             return super().form_invalid(form)
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        username = form.cleaned_data.get('username')
+        raw_password = form.cleaned_data.get('password')
+        user = authenticate(username=username, password=raw_password)
 
+        # Verifica as credenciais do usuário
+        if user is not None:
+            # Inicia a sessão do usuário
+            login(self.request, user)
 
+            # Retorna a resposta
+            return response
+        else:
+            messages.error(self.request, 'Credenciais inválidas.')
+            return redirect('signup')
 
     def form_valid_ajax(self, form):
         # Verifica se uma senha foi fornecida
@@ -62,20 +81,34 @@ class SignUpView(CreateView):
         # Salva o usuário no banco de dados
         user = form.save(commit=False)
         user.set_password(form.cleaned_data.get('password'))
+
+        # Gera o salt para o usuário
+        salt = os.urandom(32)
+        user.salt = salt.hex()
+
+        # Gera o hash da senha com o salt
+        password = form.cleaned_data.get('password').encode('utf-8')
+        hash_obj = hashlib.sha256(password + salt)
+        user.password = hash_obj.hexdigest()
+
         user.save()
 
         # Retorna uma resposta em JSON com a mensagem de sucesso
         return JsonResponse({'success': 'Usuário criado com sucesso!'})
+
 
     def form_invalid_ajax(self, form):
         errors = {}
 
         # Validação de senha fraca
         password = form.cleaned_data.get('password')
-        try:
-            validate_password(password)
-        except ValidationError as e:
-            errors.update({'password': e.messages})
+        if password is not None:
+            try:
+                validate_password(password)
+            except ValidationError as e:
+                errors.update({'password': e.messages})
+        else:
+            errors.update({'password': ['A senha não pode ser vazia.']})
 
         # Validação de usuário já cadastrado
         email = form.cleaned_data.get('email')
@@ -88,10 +121,23 @@ class SignUpView(CreateView):
         except ValidationError as e:
             errors.update({'email': [e.message]})
 
-        if 'password' in errors or 'email' in errors:
-            return JsonResponse({'error': errors})
+        if not errors:
+            # Gera um salt aleatório
+            salt = pbkdf2_sha256.using(rounds=10000, salt_size=16).gen_salt()
+
+            # Gera o hash da senha com o salt
+            password_hash = pbkdf2_sha256.using(rounds=10000, salt=salt).hash(form.cleaned_data.get('password'))
+
+            # Salva o usuário no banco de dados com a senha criptografada
+            user = form.save(commit=False)
+            user.password = password_hash
+            user.salt = salt
+            user.save()
+
+            return JsonResponse({'success': 'Usuário criado com sucesso!'})
         else:
-            return super().form_invalid_ajax(form)
+            return JsonResponse({'error': errors})
+
 
     def post(self, request, *args, **kwargs):
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -103,4 +149,25 @@ class SignUpView(CreateView):
                 return self.form_invalid_ajax(form)
         else:
             return super().post(request, *args, **kwargs)
+
+def login_view(request):
+
+    if request.user.is_authenticated:
+        # Se o usuário já estiver logado
+        return redirect('lista_produtos')
     
+    if request.method == 'POST':
+        form = LoginForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('lista_produtos')
+        else:
+            return render(request, 'account/login.html', {'form': form, 'error': 'Usuário ou senha inválido.'})
+    else:
+        form = LoginForm()
+        return render(request, 'account/login.html', {'form': form})
+        
+def logout_view(request):
+    logout(request)
+    return redirect(reverse('home'))

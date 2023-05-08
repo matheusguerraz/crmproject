@@ -1,8 +1,9 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import CustomUser
+from django.contrib.auth.forms import AuthenticationForm
 
-
+#Formulário de cadastro de usuários
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True)
     name = forms.CharField(required=True)
@@ -20,3 +21,16 @@ class CustomUserCreationForm(UserCreationForm):
         if commit:
             user.save()
         return user
+
+#Formulário de login de usuário
+class LoginForm(AuthenticationForm):
+    username = forms.CharField(
+        label='E-mail',
+        max_length=254,
+        widget=forms.TextInput(attrs={'autofocus': True})
+    )
+    password = forms.CharField(
+        label='Password',
+        strip=False,
+        widget=forms.PasswordInput,
+    )

@@ -1,0 +1,22 @@
+{% extends 'account/base.html' %}
+
+{% if request.user.is_authenticated %}
+
+<!---Modal para usuário logado-->
+(% block user_logged_modal %)
+
+
+{% else %}
+{% block content %}
+    <h2>Login</h2>
+    <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Login</button>
+    </form>
+    {% if error %}
+        <p>{{ error }}</p>
+    {% endif %}
+
+{% endblock %}
+{% endif %}

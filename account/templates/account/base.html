@@ -28,10 +28,15 @@
           </form>
         </div>
         <div class="header-right">
-          <div class="user-menu">
-            <img src="{% static 'images/icone-usuario-ab.png' %}"> 
-            <p>Seja bem-vindo, <br> <a href="#">efetue o login</a> ou <br> <a href="#">crie já sua conta</a></p>
-          </div>
+
+          {% if request.user.is_authenticated %}
+            <p>Olá, {{user.name}}</p>
+          {% else %}
+            <div class="user-menu">
+              <img src="{% static 'images/icone-usuario-ab.png' %}"> 
+              <p>Seja bem-vindo, <br> <a href="http://127.0.0.1:8000/login/">efetue o login</a> ou <br> <a href="http://127.0.0.1:8000/account/">crie já sua conta</a></p>
+            </div>
+          {% endif %}
           <div class="cart-menu">
             <a href="#" class="cart-link"></a>
             <button class="btn-carrinho">Meu carrinho</button>

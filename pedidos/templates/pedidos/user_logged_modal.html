@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>Usuário Logado</title>
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha512-tcCywYJ4pwJK4gNY3pgz6+Z+b6U78r6hWx6JqzumXTyjOMbHcUpBf2JvNFljZu2zbgMoy14ELWV7v12mJDNpMQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<!-- jQuery -->
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha384-PJXQNz /1EpFU5nC8vIkRlBaaQTlYxVvIKO8ggDlVaxpO9A /wNXcWyiJ0aDlMAdt" crossorigin="anonymous"></script>
+	<!-- Bootstrap JS -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha512-J4q3NlXg9I4ZDfS/tRkPX95Q0IyA0+/YwHeP4o4q0qTkZ9oAvQM/d7z1tL8iLMEvyMs5nb5Y5w5FnoKjOvOm5Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+	<!-- Modal -->
+	<div class="modal fade" id="user-logged-modal" tabindex="-1" aria-labelledby="user-logged-modal-label" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="user-logged-modal-label">Bem-vindo, {{ user.username }}!</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p>Você já está logado em sua conta.</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+					<a href="{% url 'lista_produtos' %}" class="btn btn-primary">Ir para Lista de Produtos</a>
+					<a href="{% url 'carrinho' %}" class="btn btn-primary">Ir para o Carrinho</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<!-- Script para exibir a modal automaticamente -->
+	<script>
+		$(window).on('load', function() {
+			$('#user-logged-modal').modal('show');
+		});
+	</script>
+</body>
+
+</html>

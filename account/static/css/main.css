@@ -50,4 +50,12 @@ form {
     width: 100%;
     max-width: 350px;
   }
-      
+  
+.nome {
+    font-size: 24px;
+    padding: 16px;
+    border: 2px solid #008000;
+    box-shadow: 0px 0px 8px #008000;
+    font-weight: bold;
+    width: 100%;
+ }

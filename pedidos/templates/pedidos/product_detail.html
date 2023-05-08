@@ -1,5 +1,9 @@
 {% extends 'pedidos/base.html' %}
+{% if request.user.is_authenticated %}
 
+{% extends 'pedidos/user_logged_modal.html' %}
+
+{% endif %}
 {% block content %}
 <div class="container">
   <div class="row">

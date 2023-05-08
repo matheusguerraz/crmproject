@@ -6,7 +6,7 @@ from .forms import EstoqueForm, MarcaForm, ProdutoImagemForm
 from django.contrib.auth.decorators import login_required
 from PIL import Image
 from io import BytesIO
-from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.core.files.storage import default_storage
 
 # Funções do CRUD da marca do sistema
 def cadastrar_marca(request):
@@ -71,22 +71,33 @@ def remover_produto(request, pk):
 
 def modificar_produto(request, pk):
     produto_para_modificar = get_object_or_404(Produto, pk=pk)
-    imagem_para_modificar = produto_para_modificar.imagem_produto
+    imagens_do_produto = []
+
+    try:
+        imagens_do_produto = produto_para_modificar.produtoimagem.all()
+    except ProdutoImagem.DoesNotExist:
+        pass
+
     if request.method == 'POST':
         form = EstoqueForm(request.POST, instance=produto_para_modificar)
-        imagem_form = ProdutoImagemForm(request.POST, request.FILES, instance=imagem_para_modificar)
+        imagem_form = ProdutoImagemForm(request.POST, request.FILES)
+
         if form.is_valid() and imagem_form.is_valid():
             produto_para_modificar = form.save(commit=False)
             produto_para_modificar.save()
+
             imagem_para_modificar = imagem_form.save(commit=False)
             imagem_para_modificar.produto = produto_para_modificar
             imagem_para_modificar.save()
+
             messages.success(request, f'O produto {produto_para_modificar.produto} foi alterado com sucesso!')
             return redirect('index')
     else:
         form = EstoqueForm(instance=produto_para_modificar)
-        imagem_form = ProdutoImagemForm(instance=imagem_para_modificar)
+        imagem_form = ProdutoImagemForm()
+
     return render(request, 'estoque/modificar_produto.html', {'produto': produto_para_modificar, 'form': form, 'imagem_form': imagem_form})
+
 
 
 def produtos_em_falta(request):
@@ -97,22 +108,28 @@ def produtos_em_falta(request):
 def cadastrar_produto(request):
     if request.method == 'POST':
         produto_form = EstoqueForm(request.POST)
-        imagem_form = ProdutoImagemForm(request.POST, request.FILES)
-        if produto_form.is_valid() and imagem_form.is_valid():
+        if produto_form.is_valid():
             produto = produto_form.save()
             produto.save()
+
             for imagem in request.FILES.getlist('imagem'):
                 # Redimensionar imagem
                 img = Image.open(imagem)
                 output = BytesIO()
                 img_resized = img.resize((800, 600), resample=Image.LANCZOS)
-                img_resized.save(output, format='JPEG', quality=100)
-                output.seek(0)
+                try:
+                    img_resized.save(output, format='JPEG', quality=100)
+                    output.seek(0)
 
-                # Salvar imagem redimensionada
-                ProdutoImagem.objects.create(imagem=InMemoryUploadedFile(
-                    output, 'ImageField', f"{imagem.name.split('.')[0]}_resized.jpg", 'image/jpeg', output.getbuffer().nbytes, None),
-                    produto=produto)
+                    # Salvar imagem redimensionada
+                    file_name = f"{imagem.name.split('.')[0]}_resized.jpg"
+                    file_content = output.getvalue()
+                    file = SimpleUploadedFile(file_name, file_content, 'image/jpeg')
+                    path = default_storage.save(file_name, file)
+                    ProdutoImagem.objects.create(imagem=path, produto=produto)
+
+                except OSError as e:
+                    messages.error(request, f"Ocorreu um erro ao salvar a imagem: {e}")
 
             mensagem = 'Produto adicionado com sucesso!'
             messages.success(request, mensagem)
@@ -121,8 +138,9 @@ def cadastrar_produto(request):
             messages.error(request, "Houve um erro ao adicionar o produto. Verifique os campos abaixo.")
     else:
         produto_form = EstoqueForm()
-        imagem_form = ProdutoImagemForm()
+    imagem_form = ProdutoImagemForm()
     return render(request, 'estoque/cadastrar_produto.html', {'produto_form': produto_form, 'imagem_form': imagem_form})
+
 
     
 
