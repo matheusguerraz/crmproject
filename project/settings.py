@@ -65,7 +65,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'estoque.apps.EstoqueConfig',
     'pedidos.apps.PedidosConfig',
-
+    'account.apps.AccountConfig',
     'widget_tweaks',
 
 ]
@@ -78,6 +78,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
 ]
 
 ROOT_URLCONF = 'project.urls'
@@ -87,7 +88,9 @@ TEMPLATES = [
         
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [str(Path(BASE_DIR).joinpath('estoque/templates')), 
-                 str(Path(BASE_DIR).joinpath('pedidos/templates'))],
+                 str(Path(BASE_DIR).joinpath('pedidos/templates')),
+                 str(Path(BASE_DIR).joinpath('account/templates'))],
+
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -122,6 +125,8 @@ DATABASES = {
     }
 }
 
+AUTH_USER_MODEL = 'account.CustomUser'
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -145,7 +150,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pt-br'
 
 TIME_ZONE = 'UTC'
 
