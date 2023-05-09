@@ -8,6 +8,7 @@ from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_protect 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseServerError
+from django.contrib import messages
 
 def lista_produtos(request):
     form = ItemCarrinho()
@@ -38,25 +39,36 @@ def sucesso_pedido(request):
 
 @login_required
 def adicionar_produto_carrinho(request):
-    print('entrou no adicionar ao carrinho')
+
     try:
         carrinho, criado = Carrinho.objects.get_or_create(usuario=request.user)
-        produto_id = request.POST.get('produto_id') # corrigir aqui, remover espaço em branco
+        produto_id = request.POST.get('produto_id').strip()
         if produto_id is not None:
             produto = get_object_or_404(Produto, pk=produto_id)
-        else: 
-            print(f'produto é none {produto_id}')  
-        quantidade = int(request.POST.get('quantidade', 1))
-        item_carrinho, criado = ItemCarrinho.objects.get_or_create(carrinho=carrinho, produto_id=produto_id)
-        if not criado:
-            item_carrinho.quantidade += quantidade
-            item_carrinho.full_clean()
-            item_carrinho.save()
-            print(f'o produto {item_carrinho.produto} foi aumentado em {quantidade}') # corrigir aqui, exibir o nome do produto
+            quantidade = int(request.POST.get('quantidade', 1))
+
+            if quantidade > produto.quantidade_em_estoque:
+                quantidade_insuficiente = True
+                print(f'caiu na condição {produto.produto}')
+                return render(request, 'pedidos/lista_produtos.html', {'quantidade_insuficiente': quantidade_insuficiente})
+
+            elif not criado:
+                item_carrinho, criado = ItemCarrinho.objects.get_or_create(carrinho=carrinho, produto_id=produto_id)
+                qtd_carrinho_e_pedido = quantidade + item_carrinho.quantidade
+
+                if qtd_carrinho_e_pedido > produto.quantidade_em_estoque:
+                    messages.error(request, f'Você já possui {produto.produto} no carrinho, e a quantidade ultrapassou a disponível em estoque.')
+
+                item_carrinho.quantidade += quantidade
+                item_carrinho.full_clean()
+                item_carrinho.save()
+                print(f'o produto {item_carrinho.produto} foi aumentado em {quantidade}')
+            else:
+                item_carrinho.quantidade = quantidade
+                item_carrinho.full_clean()
+                item_carrinho.save()
         else:
-            item_carrinho.quantidade = quantidade
-            item_carrinho.full_clean()
-            item_carrinho.save()
+            print(f'produto é none {produto_id}')
         context = {
             'carrinho': carrinho,
             'itens_carrinho': ItemCarrinho.objects.filter(carrinho=carrinho),
@@ -67,6 +79,7 @@ def adicionar_produto_carrinho(request):
     except Exception as e:
         print(f'O erro foi o {e}')
         return HttpResponseServerError(str(e))
+
 
 @login_required
 def exibir_carrinho(request):
@@ -118,26 +131,7 @@ def detalhes_produto(request, id):
     form = ItemCarrinho()
     imagens = ProdutoImagem.objects.all()
 
-    carrinho_vazio = True
-    if request.user.is_authenticated:
-        carrinho = Carrinho.objects.filter(usuario=request.user).first()
-        if carrinho and carrinho.itemcarrinho_set.exists():
-            carrinho_vazio = False
-
-    if request.method == 'POST':
-        quantidade = int(request.POST.get('quantidade', 1))
-        carrinho, criado = Carrinho.objects.get_or_create(usuario=request.user)
-        produto = get_object_or_404(Produto, pk=id)
-        item_carrinho, criado = ItemCarrinho.objects.get_or_create(carrinho=carrinho, produto=produto)
-        if not criado:
-            item_carrinho.quantidade += quantidade
-            print(item_carrinho.quantidade)
-            item_carrinho.full_clean()
-            item_carrinho.save()
-
-        return render(request, 'pedidos/carrinho_navbar.html', {'carrinho': carrinho})
-
-    return render(request, 'pedidos/product_detail.html', {'produto': produto, 'form': form, 'imagens': imagens, 'carrinho_vazio': carrinho_vazio})
+    return render(request, 'pedidos/product_detail.html', {'produto': produto, 'form': form, 'imagens': imagens})
 
 @csrf_protect
 def atualizar_carrinho(request):

@@ -45,18 +45,27 @@
           {% csrf_token %}
           <input type="hidden" name="produto_id" value="{{ produto.id }}">
           <label for="quantidade">Quantidade:</label>
-          <input type="number" name="quantidade" id="quantidade" value="1" min="1" max="{{ produto.estoque }}">
+          <input type="number" name="quantidade" id="quantidade" value="1" min="1" max="{{ qtd_maxima }}" required>
           <button type="submit">Adicionar ao carrinho</button>
         </form>
         
       </div>
     </div>
 </div>
-
+<!-- <script>
+  $(document).ready(function(){
+    {% if quantidade_insuficiente %}
+      $('#myModal').modal('show');
+    {% endif %}
+  });
+  </script> -->
 
 {% block scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.3/umd/popper.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script>
+{% include 'pedidos/modal.html' %}
+
+
 {% endblock %}
 {% endblock %}
