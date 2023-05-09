@@ -1,76 +1,62 @@
 {% extends 'pedidos/base.html' %}
-{% if request.user.is_authenticated %}
 
-{% extends 'pedidos/user_logged_modal.html' %}
-
-{% endif %}
 {% block content %}
 <div class="container">
   <div class="row">
     <div class="col-md-6">
-      {% if produto.imagem_set.all %}
-      <div id="carousel-{{ produto.id }}" class="carousel slide" data-ride="carousel">
-        <ol class="carousel-indicators">
-          {% for imagem in produto.imagem_set.all %}
-          <li data-target="#carousel-{{ produto.id }}" data-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active"{% endif %}></li>
-          {% endfor %}
-        </ol>
-        <div class="carousel-inner">
-          {% for imagem in produto.imagem_set.all %}
-          <div class="carousel-item{% if forloop.first %} active{% endif %}">
-            <img class="d-block w-100" src="{{ imagem.imagem.url }}" alt="{{ produto.produto }}">
+      {% with imagens=produto.produtoimagem_set.all %}
+      {% if imagens %}
+        <div id="carousel-{{ produto.id }}" class="carousel slide" data-ride="carousel">
+          <ol class="carousel-indicators">
+            {% for imagem in imagens %}
+              <li data-target="#carousel-{{ produto.id }}" data-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active"{% endif %}></li>
+            {% endfor %}
+          </ol>
+          <div class="carousel-inner">
+            {% for imagem in imagens %}
+              {% if imagem.produto_id == produto.id %}
+                <div class="carousel-item{% if forloop.first %} active{% endif %}">
+                  <img class="d-block w-100" src="{{ imagem.imagem.url }}" alt="{{ produto.id }}">
+                </div>
+              {% endif %}
+            {% endfor %}
           </div>
-          {% endfor %}
+          <a class="carousel-control-prev" href="#carousel-{{ produto.id }}" role="button" data-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="sr-only">Anterior</span>
+          </a>
+          <a class="carousel-control-next" href="#carousel-{{ produto.id }}" role="button" data-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="sr-only">Próximo</span>
+          </a>
         </div>
-        <a class="carousel-control-prev" href="#carousel-{{ produto.id }}" role="button" data-slide="prev">
-          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-          <span class="sr-only">Anterior</span>
-        </a>
-        <a class="carousel-control-next" href="#carousel-{{ produto.id }}" role="button" data-slide="next">
-          <span class="carousel-control-next-icon" aria-hidden="true"></span>
-          <span class="sr-only">Próximo</span>
-        </a>
-      </div>
       {% else %}
-      <p>Este produto não tem imagem associada</p>
+        <p>Este produto não tem imagem associada</p>
       {% endif %}
+      {% endwith %}
+      </div>
+      <div class="col-md-6">
+        <h2>{{ produto.produto }}</h2>
+        <p><strong>Marca:</strong> {{ produto.marca }}</p>
+        <p><strong>Sabor:</strong> {{ produto.sabor }}</p>
+        <p><strong>Preço:</strong> R$ {{ produto.preco }}</p>
+
+        <form method="post" action="{% url 'adicionar_produto_carrinho' %}?next={% url 'exibir_carrinho' %}">
+          {% csrf_token %}
+          <input type="hidden" name="produto_id" value="{{ produto.id }}">
+          <label for="quantidade">Quantidade:</label>
+          <input type="number" name="quantidade" id="quantidade" value="1" min="1" max="{{ produto.estoque }}">
+          <button type="submit">Adicionar ao carrinho</button>
+        </form>
+        
+      </div>
     </div>
-    
-   
-    <div class="col-md-6">
-      <h2>{{ produto.produto }}</h2>
-      <p><strong>Marca:</strong> {{ produto.marca }}</p>
-      <p><strong>Sabor:</strong> {{ produto.sabor }}</p>
-      <p><strong>Preço:</strong> R$ {{ produto.preco }}</p>
-      <p><strong>Descrição:</strong> {{ produto.descricao }}</p>
-      <form method="post">
-        {% csrf_token %}
-        <button id="add-to-cart-btn" class="buy-button" data-produto-id="{{ produto.id }}">Adicionar ao carrinho</button>
-      </form>
-    </div>
-  </div>
 </div>
 
-{% block scripts %}
-  <script>
-    $(document).ready(function() {
-      $('.buy-button').click(function(event) {
-        event.preventDefault();
-        var productId = $(this).data('produto-id');
-        $.ajax({
-          url: '/adicionar-ao-carrinho/',
-          method: 'POST',
-          data: {product_id: productId},
-          success: function(data) {
-            alert('Produto adicionado ao carrinho com sucesso!');
-          },
-          error: function() {
-            alert('Ocorreu um erro ao adicionar o produto ao carrinho!');
-          }
-        });
-      });
-    });
-  </script>
-{% endblock %}
 
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.3/umd/popper.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script>
+{% endblock %}
 {% endblock %}

@@ -1,11 +1,10 @@
 {% extends 'estoque/base.html' %}
 {% load widget_tweaks %}
 
-
 {% block content %}
     <div class="container">
         <h2>Editar Produto</h2>
-        <form method="POST" enctype="multipart/form-data">
+        <form method="POST">
             {% csrf_token %}
             <div class="form-group">
                 <label for="produto">Nome do Produto:</label>
@@ -21,7 +20,7 @@
                 <label for="{{ form.sabor.id_for_label }}">Sabor:</label>
                 {{ form.sabor }}
                 {% if form.sabor.errors %}
-                    <div class="form-control" role="form    ">
+                    <div class="form-control" role="form">
                         {{ form.sabor.errors }}
                     </div>
                 {% endif %}
@@ -51,19 +50,26 @@
                 {% endif %}
             </div>
 
+            <button type="submit">Salvar Alterações</button>
+        </form>
+        
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ imagem_form.as_p }}
             <div class="form-group">
-                {{ imagem_form.as_p }}
-
-                <button type="submit">Salvar Alterações</button>
-              </form>
-            
-              {% if produto.produtoimagem_set.exists %}
-                <h2>Imagens associadas ao produto</h2>
-                {% for imagem in produto.produtoimagem_set.all %}
-                  <img src="{{ imagem.imagem.url }}" alt="Imagem do produto">
-                {% endfor %}
-              {% else %}
-                <p>Produto sem imagens associadas</p>
-              {% endif %}
+                <label for="id_imagem">Imagem:</label>
+                <input type="file" name="imagem" id="id_imagem">
             </div>
+            <button type="submit">Adicionar Imagem</button>
+        </form>
+
+        {% if imagens_do_produto %}
+            <h2>Imagens associadas ao produto</h2>
+            {% for imagem in imagens_do_produto %}
+                <img src="{{ imagem.imagem.url }}" alt="Imagem do produto" width="200" height="200">
+            {% endfor %}
+        {% else %}
+            <p>Produto sem imagens associadas</p>
+        {% endif %}
+    </div>
 {% endblock %}

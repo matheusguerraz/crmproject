@@ -2,6 +2,8 @@ from django.db import models
 from estoque.models import Produto, ProdutoImagem
 from django.contrib.auth.models import User
 from django.conf import settings
+from . import forms
+from django.forms import ValidationError
 
 
 # Create your models here.
@@ -30,3 +32,5 @@ class ItemCarrinho(models.Model):
     produto = models.ForeignKey(Produto, on_delete=models.CASCADE)
     carrinho = models.ForeignKey(Carrinho, on_delete=models.CASCADE)
     quantidade = models.PositiveIntegerField(default=1)
+
+

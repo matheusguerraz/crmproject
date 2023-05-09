@@ -9,8 +9,9 @@ urlpatterns = [
     path('pedidos/', lista_produtos, name='lista_produtos'),
     path('faz-pedido/', faz_pedido, name='faz_pedido'),
     path('sucesso-pedido/', sucesso_pedido, name='sucesso_pedido'),
-    path('adicionar-ao-carrinho/<int:id>/', views.adicionar_ao_carrinho, name='adicionar_ao_carrinho'),
-    path('carrinho/<int:id>/', views.carrinho_ajax, name='carrinho'),
+    path('carrinho/', views.adicionar_produto_carrinho, name='adicionar_produto_carrinho'),
+    path('carrinho/', views.exibir_carrinho, name='exibir_carrinho'),
+    path('remover-do-carrinho/', views.remover_produto_carrinho, name='remover_produto_carrinho'),
     path('produto/<int:id>/', views.detalhes_produto, name='detalhes_produto'),
 
 ]
