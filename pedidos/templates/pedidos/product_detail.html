@@ -1,5 +1,5 @@
 {% extends 'pedidos/base.html' %}
-
+{% load static %}
 {% block content %}
 <div class="container">
   <div class="row">
@@ -41,30 +41,30 @@
         <p><strong>Sabor:</strong> {{ produto.sabor }}</p>
         <p><strong>Preço:</strong> R$ {{ produto.preco }}</p>
 
-        <form method="post" action="{% url 'adicionar_produto_carrinho' %}?next={% url 'exibir_carrinho' %}">
+        
+        <form action="{% url 'adicionar_produto_carrinho' %}" method="post">
+
           {% csrf_token %}
           <input type="hidden" name="produto_id" value="{{ produto.id }}">
           <label for="quantidade">Quantidade:</label>
           <input type="number" name="quantidade" id="quantidade" value="1" min="1" max="{{ qtd_maxima }}" required>
-          <button type="submit">Adicionar ao carrinho</button>
+          <button class="btn-adicionar-carrinho" id="btn-adicionar-carrinho" type="submit">Adicionar ao carrinho</button>
         </form>
         
       </div>
     </div>
 </div>
-<!-- <script>
-  $(document).ready(function(){
-    {% if quantidade_insuficiente %}
-      $('#myModal').modal('show');
-    {% endif %}
-  });
-  </script> -->
 
 {% block scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.3/umd/popper.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script>
-{% include 'pedidos/modal.html' %}
+
+<script src="{% static 'js/stockcontrol_modals.js' %}"></script>
+
+
+
+{% include 'pedidos/modal_estoque_insuficiente.html' %}
 
 
 {% endblock %}

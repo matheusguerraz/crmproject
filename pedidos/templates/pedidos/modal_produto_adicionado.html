@@ -1,0 +1,32 @@
+<div class="modal fade" id="modal_produto_adicionado" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="myModalLabel">Sucesso</h4>
+      </div>
+      <div class="modal-body">
+        Seu produto já está no carrinho e a quantidade foi atualizada.
+      </div>
+      <div class="modal-footer">
+        <div class="float-left">
+          <button type="button" id="btn-ver-carrinho" class="btn btn-primary" data-dismiss="modal">Ver meu carrinho</button>
+        </div>
+        <div>
+          <button type="button" id="btn-voltar-inicio" class="btn btn-default" data-dismiss="modal">Voltar ao início</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  const btnVerCarrinho = document.getElementById('btn-ver-carrinho');
+  btnVerCarrinho.addEventListener('click', function() {
+    // Insira aqui a ação para visualizar o carrinho
+    $('#modal_produto_adicionado').modal('hide');
+  });
+
+  const btnVoltarInicio = document.getElementById('btn-voltar-inicio');
+  btnVoltarInicio.addEventListener('click', function() {
+    window.location.href = 'http://127.0.0.1:8000/pedidos';
+  });
+</script>

@@ -8,7 +8,8 @@ from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_protect 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseServerError
-from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 def lista_produtos(request):
     form = ItemCarrinho()
@@ -38,35 +39,44 @@ def sucesso_pedido(request):
     return render(request, 'pedidos/sucesso_pedido.html')
 
 @login_required
+@csrf_exempt
+@csrf_protect
 def adicionar_produto_carrinho(request):
 
+    if request.method == 'POST' and request.headers.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+        print('chegou aqui')
+        data = json.loads(request.body)
+        valor = data.get('valor')
+        print(f'a quantidade inserida botão foi {valor}')
+        
+        if (int(valor) + item_carrinho.quantidade) > quantidade_estoque:
+            return JsonResponse({'quantidae_acima': True})
+    
     try:
         carrinho, criado = Carrinho.objects.get_or_create(usuario=request.user)
         produto_id = request.POST.get('produto_id').strip()
+
         if produto_id is not None:
             produto = get_object_or_404(Produto, pk=produto_id)
             quantidade = int(request.POST.get('quantidade', 1))
 
-            if quantidade > produto.quantidade_em_estoque:
-                quantidade_insuficiente = True
-                print(f'caiu na condição {produto.produto}')
-                return render(request, 'pedidos/lista_produtos.html', {'quantidade_insuficiente': quantidade_insuficiente})
+            quantidade_estoque = produto.quantidade_em_estoque
 
-            elif not criado:
+
+            if not criado:
                 item_carrinho, criado = ItemCarrinho.objects.get_or_create(carrinho=carrinho, produto_id=produto_id)
                 qtd_carrinho_e_pedido = quantidade + item_carrinho.quantidade
-
-                if qtd_carrinho_e_pedido > produto.quantidade_em_estoque:
-                    messages.error(request, f'Você já possui {produto.produto} no carrinho, e a quantidade ultrapassou a disponível em estoque.')
-
+                    
                 item_carrinho.quantidade += quantidade
                 item_carrinho.full_clean()
                 item_carrinho.save()
-                print(f'o produto {item_carrinho.produto} foi aumentado em {quantidade}')
             else:
                 item_carrinho.quantidade = quantidade
                 item_carrinho.full_clean()
                 item_carrinho.save()
+            
+            
+
         else:
             print(f'produto é none {produto_id}')
         context = {
@@ -74,13 +84,16 @@ def adicionar_produto_carrinho(request):
             'itens_carrinho': ItemCarrinho.objects.filter(carrinho=carrinho),
         }
 
+
+        context['produto_adicionado'] = True
         next_url = request.GET.get('next', reverse('exibir_carrinho'))
-        return redirect(next_url)
+        print(context)
+        return redirect('{}?produto_adicionado=true'.format(next_url))
+
     except Exception as e:
         print(f'O erro foi o {e}')
         return HttpResponseServerError(str(e))
-
-
+    
 @login_required
 def exibir_carrinho(request):
     carrinho, criado = Carrinho.objects.get_or_create(usuario=request.user)
@@ -126,7 +139,33 @@ def remover_produto_carrinho(request):
 
 @csrf_protect
 @login_required
+
 def detalhes_produto(request, id):
+    carrinho, criado = Carrinho.objects.get_or_create(usuario=request.user)
+    produto = get_object_or_404(Produto, pk=id)
+    item_carrinho = ItemCarrinho.objects.filter(carrinho=carrinho, produto=produto).first()
+    
+    if item_carrinho:
+        quantidade_no_carrinho = item_carrinho.quantidade
+    else:
+        quantidade_no_carrinho = 0
+
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        valor = data.get('valor')
+        
+        qtd_carrinho_e_estoque = quantidade_no_carrinho + produto.quantidade_em_estoque
+        print(valor)
+        print(qtd_carrinho_e_estoque)
+        if (int(valor) + quantidade_no_carrinho) > produto.quantidade_em_estoque:
+            print(f'o valor selecionado é {valor} e o total disponível é {produto.quantidade_em_estoque}')
+            return JsonResponse({'valorMaiorQueDisponivel': True})
+        
+        else:
+            return JsonResponse({'valorMaiorQueDisponivel': False})
+
+    
+        
     produto = get_object_or_404(Produto, pk=id)
     form = ItemCarrinho()
     imagens = ProdutoImagem.objects.all()

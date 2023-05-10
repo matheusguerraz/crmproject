@@ -52,11 +52,27 @@
             <td class="font-weight-bold text-success">R$ {{ total_pedido }}</td>
           </tr>
         </tbody>
+        <script>
+          function getParameterByName(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+          }
+          
+          $(document).ready(function() {
+            console.log(getParameterByName('produto_adicionado')); // adicione essa linha
+          
+            if (getParameterByName('produto_adicionado') === 'true') {
+              console.log('Modal deveria');
+              $('#modal_produto_adicionado').modal('show');
+              history.replaceState(null, '', window.location.pathname + '?produto_adicionado=false');
+            }
+          });
+            
+        </script>
       </table>
     </div>
   </div>
-{% endblock %}
+  {% include 'pedidos/modal_produto_adicionado.html' %}
 
-{% block sidebar %}
-  <!-- coloque aqui o conteúdo específico do sidebar do template do carrinho -->
+
 {% endblock %}
