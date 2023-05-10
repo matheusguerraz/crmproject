@@ -9,31 +9,6 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseServerError
 from django.views.decorators.csrf import csrf_exempt
 import json
-from django.contrib.sessions.backends.db import SessionStore
-
-
-class CarrinhoMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
-        if not request.user.is_authenticated:
-            if 'carrinho_id' not in request.session:
-                carrinho = Carrinho.objects.create()
-                request.session['carrinho_id'] = carrinho.id
-            else:
-                carrinho_id = request.session['carrinho_id']
-                carrinho = Carrinho.objects.filter(id=carrinho_id).first()
-                if carrinho is None:
-                    carrinho = Carrinho.objects.create()
-                    request.session['carrinho_id'] = carrinho.id
-        else:
-            carrinho, _ = Carrinho.objects.get_or_create(usuario=request.user)
-
-        request.carrinho = carrinho
-        response = self.get_response(request)
-
-        return response
 
 def lista_produtos(request):
     form = ItemCarrinho()
@@ -65,54 +40,53 @@ def sucesso_pedido(request):
 @csrf_exempt
 @csrf_protect
 def adicionar_produto_carrinho(request):
-
     if request.method == 'POST' and request.headers.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
-        print('chegou aqui')
         data = json.loads(request.body)
         valor = data.get('valor')
         print(f'a quantidade inserida botão foi {valor}')
         
         if (int(valor) + item_carrinho.quantidade) > quantidade_estoque:
-            return JsonResponse({'quantidae_acima': True})
+            return JsonResponse({'quantidade_acima': True})
     
     try:
-        if request.user.is_authenticated:
-            carrinho, criado = Carrinho.objects.get_or_create(usuario=request.user)
-            produto_id = request.POST.get('produto_id').strip()
-        else:
-            carrinho, criado = Carrinho.objects.get_or_create(usuario=None)
-            produto_id = request.POST.get('produto_id').strip()
-        
-        itens_carrinho = ItemCarrinho.objects.filter(Q(carrinho__usuario=request.user) | Q(carrinho__usuario__isnull=True))
-
+        carrinho = request.carrinho
+        produto_id = request.POST.get('produto_id')
+    
         if produto_id is not None:
             produto = get_object_or_404(Produto, pk=produto_id)
             quantidade = int(request.POST.get('quantidade', 1))
 
             quantidade_estoque = produto.quantidade_em_estoque
-
-
+            
+            # Verifica se o item já existe no carrinho
+            item_carrinho, criado = ItemCarrinho.objects.get_or_create(
+                carrinho=carrinho,
+                produto_id=produto_id,
+            )
+            
+            # Atualiza a quantidade do item se ele já existe no carrinho
             if not criado:
-                item_carrinho, criado = ItemCarrinho.objects.get_or_create(carrinho=carrinho, produto_id=produto_id)
                 qtd_carrinho_e_pedido = quantidade + item_carrinho.quantidade
-                    
-                item_carrinho.quantidade += quantidade
-                item_carrinho.full_clean()
-                item_carrinho.save()
+                if qtd_carrinho_e_pedido > quantidade_estoque:
+                    return JsonResponse({'quantidade_acima': True})
+                
+                item_carrinho.quantidade = qtd_carrinho_e_pedido
             else:
+                if quantidade > quantidade_estoque:
+                    return JsonResponse({'quantidade_acima': True})
+                
                 item_carrinho.quantidade = quantidade
-                item_carrinho.full_clean()
-                item_carrinho.save()
+                
+            item_carrinho.full_clean()
+            item_carrinho.save()
             
-            
-
         else:
             print(f'produto é none {produto_id}')
+        
         context = {
             'carrinho': carrinho,
             'itens_carrinho': ItemCarrinho.objects.filter(carrinho=carrinho),
         }
-
 
         context['produto_adicionado'] = True
         next_url = request.GET.get('next', reverse('exibir_carrinho'))
@@ -124,7 +98,13 @@ def adicionar_produto_carrinho(request):
         return HttpResponseServerError(str(e))
     
 def exibir_carrinho(request):
-    carrinho, criado = Carrinho.objects.get_or_create(usuario=request.user)
+    carrinho_id = request.session.get('carrinho_id')
+    if carrinho_id:
+        carrinho = Carrinho.objects.get(id=carrinho_id)
+    else:
+        carrinho = Carrinho.objects.create()
+        request.session['carrinho_id'] = carrinho.id
+    carrinho = request.carrinho
     itemcarrinho = ItemCarrinho.objects.filter(carrinho=carrinho)
     produtos = []
     imagens = ProdutoImagem.objects.all()
@@ -168,12 +148,8 @@ def remover_produto_carrinho(request):
 
 @csrf_protect
 def detalhes_produto(request, id):
-    if request.user.is_authenticated:
-        carrinho, criado = Carrinho.objects.get_or_create(usuario=request.user)
 
-    else:
-        carrinho = Carrinho.objects.create()
-    
+    carrinho = request.carrinho
     produto = get_object_or_404(Produto, pk=id)
     item_carrinho = ItemCarrinho.objects.filter(carrinho=carrinho, produto=produto).first()
     
