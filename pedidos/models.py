@@ -24,7 +24,7 @@ class ItemPedido(models.Model):
     quantidade = models.PositiveIntegerField(default=1)
 
 class Carrinho(models.Model):
-    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
 

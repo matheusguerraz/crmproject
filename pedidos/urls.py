@@ -12,7 +12,7 @@ urlpatterns = [
     path('adicionar-ao-carrinho/', views.adicionar_produto_carrinho, name='adicionar_produto_carrinho'),
     path('carrinho/', views.exibir_carrinho, name='exibir_carrinho'),
     path('remover-do-carrinho/', views.remover_produto_carrinho, name='remover_produto_carrinho'),
-    path('produto/<int:id>/', views.detalhes_produto, name='detalhes_produto'),
+    path('produto/<id>/', views.detalhes_produto, name='detalhes_produto'),
     path('file-traffic/', views.adicionar_produto_carrinho, name='fale-traffic'),
 
 

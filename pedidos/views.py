@@ -4,19 +4,42 @@ from django.urls import reverse
 from .models import Produto, Pedido, ItemPedido, Carrinho, ItemCarrinho, ProdutoImagem
 from .forms import PedidoForm
 from django.http import JsonResponse
-from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_protect 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseServerError
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.contrib.sessions.backends.db import SessionStore
+
+
+class CarrinhoMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if not request.user.is_authenticated:
+            if 'carrinho_id' not in request.session:
+                carrinho = Carrinho.objects.create()
+                request.session['carrinho_id'] = carrinho.id
+            else:
+                carrinho_id = request.session['carrinho_id']
+                carrinho = Carrinho.objects.filter(id=carrinho_id).first()
+                if carrinho is None:
+                    carrinho = Carrinho.objects.create()
+                    request.session['carrinho_id'] = carrinho.id
+        else:
+            carrinho, _ = Carrinho.objects.get_or_create(usuario=request.user)
+
+        request.carrinho = carrinho
+        response = self.get_response(request)
+
+        return response
 
 def lista_produtos(request):
     form = ItemCarrinho()
     produtos = Produto.objects.filter(quantidade_em_estoque__gt=0)
     imagens = ProdutoImagem.objects .all()
     return render(request, 'pedidos/product_list.html', {'produtos': produtos,'imagens': imagens ,'form': form})
-
 
 
 def faz_pedido(request):
@@ -38,7 +61,7 @@ def faz_pedido(request):
 def sucesso_pedido(request):
     return render(request, 'pedidos/sucesso_pedido.html')
 
-@login_required
+
 @csrf_exempt
 @csrf_protect
 def adicionar_produto_carrinho(request):
@@ -53,8 +76,14 @@ def adicionar_produto_carrinho(request):
             return JsonResponse({'quantidae_acima': True})
     
     try:
-        carrinho, criado = Carrinho.objects.get_or_create(usuario=request.user)
-        produto_id = request.POST.get('produto_id').strip()
+        if request.user.is_authenticated:
+            carrinho, criado = Carrinho.objects.get_or_create(usuario=request.user)
+            produto_id = request.POST.get('produto_id').strip()
+        else:
+            carrinho, criado = Carrinho.objects.get_or_create(usuario=None)
+            produto_id = request.POST.get('produto_id').strip()
+        
+        itens_carrinho = ItemCarrinho.objects.filter(Q(carrinho__usuario=request.user) | Q(carrinho__usuario__isnull=True))
 
         if produto_id is not None:
             produto = get_object_or_404(Produto, pk=produto_id)
@@ -94,7 +123,6 @@ def adicionar_produto_carrinho(request):
         print(f'O erro foi o {e}')
         return HttpResponseServerError(str(e))
     
-@login_required
 def exibir_carrinho(request):
     carrinho, criado = Carrinho.objects.get_or_create(usuario=request.user)
     itemcarrinho = ItemCarrinho.objects.filter(carrinho=carrinho)
@@ -122,12 +150,13 @@ def exibir_carrinho(request):
 
 
 
-@login_required
 def remover_produto_carrinho(request):
-    carrinho, criado = Carrinho.objects.get_or_create(usuario=request.user)
-    produto_id = request.POST['produto_id']
-    produto = get_object_or_404(Produto, pk=produto_id)
-    item_carrinho = carrinho.itemcarrinho_set.filter(produto=produto).first()
+
+    if request.user.is_authenticated:
+        carrinho, criado = Carrinho.objects.get_or_create(usuario=request.user)
+        produto_id = request.POST['produto_id']
+        produto = get_object_or_404(Produto, pk=produto_id)
+        item_carrinho = carrinho.itemcarrinho_set.filter(produto=produto).first()
     if item_carrinho:
         if item_carrinho.quantidade > 1:
             item_carrinho.quantidade -= 1
@@ -138,10 +167,13 @@ def remover_produto_carrinho(request):
     return redirect('exibir_carrinho')
 
 @csrf_protect
-@login_required
-
 def detalhes_produto(request, id):
-    carrinho, criado = Carrinho.objects.get_or_create(usuario=request.user)
+    if request.user.is_authenticated:
+        carrinho, criado = Carrinho.objects.get_or_create(usuario=request.user)
+
+    else:
+        carrinho = Carrinho.objects.create()
+    
     produto = get_object_or_404(Produto, pk=id)
     item_carrinho = ItemCarrinho.objects.filter(carrinho=carrinho, produto=produto).first()
     
