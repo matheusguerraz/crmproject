@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
   {% load static %}
@@ -8,6 +7,7 @@
     <title>{% block title %}Meu Site{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/header.css' %}">
+
     <!-- jQuery library -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!---JS Cookie-->
@@ -23,40 +23,10 @@
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
   </head> 
   <body>
-    <header>
-      <div class="header-top">
-        <div class="header-left">
-          <a href="#" class="logo"><img src="{% static 'images/logotipo.jpeg' %}" alt="Logo"></a>
-          <form class="search-form" action="#" method="GET">
-            <input type="text" name="search" placeholder="Pesquisar suplemento">
-            <button type="submit"><i class="fas fa-search"></i></button>
-          </form>
-        </div>
-        <div class="header-right">
-          {% if request.user.is_authenticated %}
-            <p>Olá, {{user.name}}</p>
-          {% else %}
-            <div class="user-menu">
-              <img src="{% static 'images/icone-usuario-ab.png' %}"> 
-              <p>Seja bem-vindo, <br> <a href="http://127.0.0.1:8000/login/">efetue o login</a> ou <br> <a href="http://127.0.0.1:8000/account/">crie já sua conta</a></p>
-            </div>
-          {% endif %}
+{% include 'pedidos/header.html' %}
 
-        </div>
-      </div>
 
-  <div class="header-bottom">
-    <nav class="product-filters">
-      <ul>
-        <li><a href="#">Whey</a></li>
-        <li><a href="#">Pré treino</a></li>
-        <li><a href="#">Hipercalórico</a></li>
-        <li><a href="#">Pasta de amendoim</a></li>
-      </ul>
-    </nav>
-  </div>
-</header>
-    
+      
 <main>
   {% block content %}
   <div class="container">
@@ -83,5 +53,7 @@
   </div>
   {% endblock %}
 </main>
+  <script src="{% static 'js/logout_modal.js' %}"></script>
+
   </body>
 </html>

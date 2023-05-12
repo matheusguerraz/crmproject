@@ -1,0 +1,20 @@
+
+<div class="modal fade" id="logout-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" id="myModalLabel">Sucesso</h4>
+        </div>
+        <div class="modal-body">
+          Sua sessão foi encerrada.
+        </div>
+        <div class="modal-footer">
+          <a href="{% url 'lista_produtos' %}" class="btn btn-default">&times; Fechar</a>
+        </div>
+    </div>
+  </div>
+  <script>
+$('#logout-modal').click(function(event) {
+  event.stopPropagation();
+});
+  </script>

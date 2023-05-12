@@ -1,0 +1,57 @@
+<header>
+    {% load static %}
+
+    <div class="header-top">
+      <div class="header-left">
+        <a href="http://127.0.0.1:8000/pedidos/" class="logo"><img src="{% static 'images/logotipo.jpeg' %}" alt="Logo"></a>
+        
+        <form class="search-form" action="{% url 'lista_produtos' %}" method="GET">
+          <input type="text" name="search" placeholder="Pesquisar suplemento">
+          <button type="submit"><i class="fas fa-search"></i></button>
+          {% if messages %}
+          {% for message in messages %}
+              <div class="alert alert-{{ message.tags }}">
+                  {{ message }}
+              </div>
+          {% endfor %}
+          {% endif %}
+        </form>
+      
+        <div class="user-menu">
+          {% if request.user.is_authenticated %}
+            <p class="user-greeting">Olá, {{request.user.name}}</p>
+            <form method="post" action="{% url 'logout' %}">
+              {% csrf_token %}
+              <button type="submit" id="logout-btn" class="btn btn-link logout-btn">Logout</button>
+            </form>
+          {% else %}
+   
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-login">
+
+            Fazer login
+            
+          </button>
+               
+          {% endif %}
+        
+        </div>
+        <div class="cart-menu">
+          <button class="btn btn-primary cart-btn" onclick="window.location.href='{% url 'exibir_carrinho' %}'">
+            <i class="fas fa-shopping-cart cart-icon"></i> Meu carrinho
+          </button>
+        </div>
+        </div>
+    </div>
+    <div class="header-bottom">
+      <nav class="product-filters">
+        <ul>
+          <li><a href="http://127.0.0.1:8000/pedidos/?search=whey">Whey</a></li>
+          <li><a href="http://127.0.0.1:8000/pedidos/?search=creatina">Creatina</a></li>
+          <li><a href="http://127.0.0.1:8000/pedidos/?search=hipercalorico">Hipercalórico</a></li>
+          <li><a href="http://127.0.0.1:8000/pedidos/?search=pasta+de+amendoim">Pasta de amendoim</a></li>
+        </ul>
+      </nav>
+    </div>
+    {% include 'account/login.html' %}
+
+  </header>    

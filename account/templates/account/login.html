@@ -1,22 +1,164 @@
-{% extends 'account/base.html' %}
+{% load static %}
 
-{% if request.user.is_authenticated %}
+<div id="modal-login" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="myModalLabel">Faça login</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 
-<!---Modal para usuário logado-->
-(% block user_logged_modal %)
+      </div>
+      <div class="modal-body">
+        <form method="post" action="{% url 'login' %}" id="login">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <div class="form-group">
+            <label for="username">Usuário:</label>
+            <input type="text" class="form-control" id="username" name="username" placeholder="Insira seu e-mail">
+          </div>
+          <div class="form-group">
+            <label for="password">Senha:</label>
+            <input type="password" class="form-control" id="password" name="password" placeholder="Digite sua senha">
+          </div>
+          <button type="submit" class="btn btn-primary" style="float:right;">Entrar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
 
 
-{% else %}
-{% block content %}
-    <h2>Login</h2>
-    <form method="post" action="{% url 'login' %}">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Login</button>
-    </form>
-    {% if error %}
-        <p>{{ error }}</p>
-    {% endif %}
+  #modal-login {
+  background-color: rgba(0, 0, 0, 0.7);
+  display: none;
+  height: 100%;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 9999;
+}
 
-{% endblock %}
-{% endif %}
+#modal-login .modal-dialog {
+  margin-top: 100px;
+}
+
+#modal-login .modal-content {
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  padding: 20px;
+}
+
+#modal-login .modal-title {
+  font-size: 24px;
+  margin-top: 0;
+  color: black;
+  font-weight: bold;
+ }
+
+#modal-login .form-group {
+  margin-bottom: 20px;
+  
+}
+
+#modal-login label {
+  font-weight: bold;
+}
+
+#modal-login input[type=text], #modal-login input[type=password] {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  display: block;
+  font-size: 14px;
+  padding: 10px;
+  width: 100%;
+}
+
+#modal-login button[type=submit] {
+  background-color: #337ab7;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 10px 20px;
+}
+
+#modal-login button[type=submit]:hover {
+  background-color: #286090;
+}
+
+.close{
+  display: flex;
+  justify-content: flex-end;
+}
+
+.close button {
+  background: none;
+  border: none;
+  font-size: 25px;
+  font-weight: bold;
+  color: #000;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+}
+
+.close button:hover {
+  color: #888;
+}
+
+@media (min-width: 768px) {
+
+  .modal-dialog {
+    width: 600px;
+  }
+  #modal-login .modal-dialog {
+margin-top: 80px;
+margin-bottom: 80px;
+}
+
+#modal-login .modal-content {
+padding: 30px;
+}
+
+#modal-login .modal-title {
+font-size: 36px;
+margin-bottom: 30px;
+}
+
+#modal-login label {
+font-size: 18px;
+}
+
+#modal-login input[type=text], #modal-login input[type=password] {
+font-size: 18px;
+}
+
+#modal-login button[type=submit] {
+font-size: 18px;
+padding: 10px 30px;
+}
+
+.close{
+justify-content: flex-end;
+margin-top: -25px;
+margin-right: -25px;
+font-size: 32px;
+font-weight: bold;
+line-height: 1;
+color: #000;
+opacity: 0.3;
+}
+
+.close:hover {
+color: #000;
+opacity: 0.5;
+text-decoration: none;
+cursor: pointer;
+}
+}
+</style>

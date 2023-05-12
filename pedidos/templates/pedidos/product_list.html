@@ -8,11 +8,18 @@
 
 <div class="container">
   <h1>Lista de Produtos</h1>
-  <div class="product-grid">
+  <div class="row">
+    {% if nothing %}
+    <div class="container-no-results">
+     
+      <h1>Ops!</h1>
+      <div>Parece que não conseguimos encontrar o que você está procurando.  <a href="http://127.0.0.1:8000/pedidos/">voltar para a página inicial </a></div>
+  </div>
+    {% else %}
     {% for produto in produtos %}
-      <div class="product-item">
-        <a href="{% url 'detalhes_produto' produto.id %}">
-          <div class="col-md-6">
+      <div class="col-md-4 mb-4">
+        <div class="card h-100">
+          <a href="{% url 'detalhes_produto' produto.id %}">
             {% with imagens=produto.produtoimagem_set.all %}
               {% if imagens %}
                 <div id="carousel-{{ produto.id }}" class="carousel slide" data-ride="carousel">
@@ -43,16 +50,48 @@
                 <p>Este produto não tem imagem associada</p>
               {% endif %}
             {% endwith %}
-          </div>
-        </a>
-        <div class="product-info">
-          <h2>{{ produto.produto }}</h2>
-          <p>{{ produto.descricao }}</p>
-          <p>Preço: R$ {{ produto.preco }}</p>
+          </a>
+            <div class="card-body-wrapper">
+            <div class="card-body">
+
+              
+              <h2 class="card-title">{{ produto.produto }}</h2>
+              <p class="card-text">{{ produto.descricao }}</p>
+              <p class="card-text">Preço: R$ {{ produto.preco }}</p>
+              
+            </div>
+          </div>   
         </div>
       </div>
-    {% endfor %}    
+      
+      {% if forloop.counter|divisibleby:4 %}
+        </div><div class="row">
+      {% endif %}
+    {% endfor %}
   </div>
 </div>
+{% endif %}
+
+{% include 'pedidos/logout_modal.html' %}
+<script src="{% static 'js/logout_modal.js' %}"></script>
+
+<script>
+  function getParameterByName(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+  }
+  
+  $(document).ready(function() {
+    console.log(getParameterByName('logout')); 
+    
+    if (getParameterByName('logout') === 'true') {
+      
+      $('#logout-modal ').modal('show');
+      history.replaceState(null, '', window.location.pathname);
+
+    }});
+</script>
+
 
 {% endblock %}
+

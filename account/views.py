@@ -6,12 +6,14 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
 from .forms import CustomUserCreationForm, LoginForm
 from .models import CustomUser
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login,logout
+from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import render, redirect
 from django.urls import reverse
 import hashlib
 from passlib.hash import pbkdf2_sha256
 import os
+from urllib.parse import urlencode
 
 
 class SignUpView(CreateView):
@@ -151,23 +153,32 @@ class SignUpView(CreateView):
             return super().post(request, *args, **kwargs)
 
 def login_view(request):
-
-    if request.user.is_authenticated:
-        # Se o usuário já estiver logado
-        return redirect('lista_produtos')
-    
     if request.method == 'POST':
-        form = LoginForm(request, data=request.POST)
+        form = AuthenticationForm(request, data=request.POST)
+        print('passou na view')
         if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            return redirect('lista_produtos')
-        else:
-            return render(request, 'account/login.html', {'form': form, 'error': 'Usuário ou senha inválido.'})
+            # Tenta autenticar o usuário
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(request, username=username, password=password)
+
+            if user is not None:
+                # Autentica o usuário e redireciona para a página de destino
+                login(request, user)
+                return redirect('lista_produtos')
+            else:
+                # Informa que as credenciais são inválidas
+                form.add_error(None, 'Credenciais inválidas. Por favor, tente novamente.')
+
     else:
-        form = LoginForm()
-        return render(request, 'account/login.html', {'form': form})
+        form = AuthenticationForm()
+
+    return render(request, 'login.html', {'form': form})
         
 def logout_view(request):
+    
+    params = {'logout': 'true'}
+    query_string = urlencode(params)
+    url = f"{reverse('lista_produtos')}?{query_string}"
     logout(request)
-    return redirect(reverse('home'))
+    return redirect(url)

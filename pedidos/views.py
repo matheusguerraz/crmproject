@@ -2,6 +2,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from .models import Produto, Pedido, ItemPedido, Carrinho, ItemCarrinho, ProdutoImagem
+from django.db.models import Q
 from .forms import PedidoForm
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_protect 
@@ -9,12 +10,32 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseServerError
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.contrib import messages
+
 
 def lista_produtos(request):
-    form = ItemCarrinho()
-    produtos = Produto.objects.filter(quantidade_em_estoque__gt=0)
-    imagens = ProdutoImagem.objects .all()
-    return render(request, 'pedidos/product_list.html', {'produtos': produtos,'imagens': imagens ,'form': form})
+    query = request.GET.get('search')
+
+    if query:
+        produtos = Produto.objects.filter(
+            Q(produto__icontains=query) |
+            Q(descricao__icontains=query) 
+        )
+        if not produtos:
+            nothing = True
+
+    else:
+
+        form = ItemCarrinho()
+        produtos = Produto.objects.filter(quantidade_em_estoque__gt=0)
+        imagens = ProdutoImagem.objects .all()
+        return render(request, 'pedidos/product_list.html', {'produtos': produtos,'imagens': imagens ,'form': form})
+    nothing = len(produtos) == 0
+    print(nothing)
+    return render(request, 'pedidos/product_list.html', {
+                                                        'produtos': produtos, 
+                                                        'nothing': nothing
+                                                        })
 
 
 def faz_pedido(request):
