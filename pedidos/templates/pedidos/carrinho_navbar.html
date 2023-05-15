@@ -78,11 +78,12 @@
       <div class="text-right">
 
     <!-- Botão para abrir a modal -->
-    {% csrf_token %}    
-
+    <form method="POST">
+      {% csrf_token %}    
     <button type="button" class="finalizar-pedido-btn" id="finalizar-pedido-btn" data-toggle="modal" data-target="#finalizar-pedido-modal">
       Finalizar Pedido
     </button>
+    </form>
 
       </div>
     </div>
@@ -108,16 +109,8 @@ document.querySelectorAll('.quantidade-botao').forEach(botao => {
 
 const campoQuantidade = document.querySelector(`#quantidade-${botao.dataset.itemId}`);
 const quantidadeAtual = parseInt(campoQuantidade.value);
+const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value; // obtém o token CSRF do input
 
-$(document).ready(function() {
-  // Obtém o token CSRF do cookie
-  var csrfToken = getCookie('csrftoken');
-  
-  // Adiciona o token CSRF aos dados da requisição
-  var data = {
-    'csrfmiddlewaretoken': csrfToken,
-    // Aqui você pode adicionar os outros dados do seu formulário
-  };
 
 const novaQuantidade = botao.dataset.operacao === 'adicionar' ? quantidadeAtual + 1 : quantidadeAtual - 1;
 if (novaQuantidade < 1 || novaQuantidade > parseInt(campoQuantidade.max)) {
@@ -153,7 +146,6 @@ location.reload(true);
 
 
 const finalizarPedidoBtn = document.getElementById('finalizar-pedido-btn');
-
 // verificando se o carrinho está vazio
 const carrinho_vazio = document.querySelectorAll('.carrinho-item').length === 0;
 
@@ -166,12 +158,15 @@ finalizarPedidoBtn.addEventListener('click', () => {
   xhr.open('POST', '/finalizar-pedido/', true);
   xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
 
-  const csrfToken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value; // obtém o token CSRF do input
   const dados = JSON.stringify({
+
     'carrinho_vazio': carrinho_vazio,
     'usuario_autenticado': usuario_autenticado,
-    'csrfmiddlewaretoken': csrfToken
+
   });
+
+  xhr.setRequestHeader('X-CSRFToken', csrfToken);
 
   xhr.onreadystatechange = function() {
     if (xhr.readyState === XMLHttpRequest.DONE) {
@@ -199,11 +194,11 @@ finalizarPedidoBtn.addEventListener('click', () => {
     }
   };
 
+  console.log(csrfToken);
+  console.log(dados);
   xhr.send(dados);
-});
-});
 
-
+});
 </script>
     </div>
   </div>
