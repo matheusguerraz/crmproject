@@ -2,9 +2,6 @@ from django.db import models
 from estoque.models import Produto, ProdutoImagem
 from django.contrib.auth.models import User
 from django.conf import settings
-from . import forms
-from django.forms import ValidationError
-
 
 # Create your models here.
 
@@ -13,6 +10,7 @@ class Pedido(models.Model):
     email_cliente = models.EmailField()
     produtos = models.ManyToManyField(Produto, through='ItemPedido')
     data_pedido = models.DateTimeField(auto_now_add=True)
+    telefone = models.CharField(max_length=11, blank=True, null=True, verbose_name='Nº telefone celular') 
     status = models.CharField(max_length=20, default='aberto')
 
     def __str__(self):

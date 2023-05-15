@@ -1,17 +1,20 @@
 {% extends 'pedidos/base.html' %}
-
+{% load static %}
 {% block content %}
-  <h1 class="text-center display-4 mb-5">Meu Carrinho</h1>
+<link rel="stylesheet" href="{% static 'css/carrinho.css' %}">
 
-  <div class="row">
+  <h1 class="text-center display-4 mb-5">Meu Carrinho</h1>
+  <div class="row justify-content-center">
     <div class="col-12 col-md-8">
       <table class="table table-striped">
         <thead>
           <tr>
             <th scope="col">Produto</th>
+            <th scope="col">Marca</th>
+            <th scope="col">Descrição</th>
             <th scope="col">Preço</th>
             <th scope="col">Quantidade</th>
-            <th scope="col">Total</th>
+            <th scope="col">Subtotal</th>
           </tr>
         </thead>
         <tbody>
@@ -21,7 +24,7 @@
                 <div class="media">
                   {% with imagem=item.produto.produtoimagem_set.first %}
                   {% if imagem %}
-                    <img src="{{ imagem.imagem.url }}" alt="{{ item.produto.nome }}" style="max-width: 15%;">
+                    <img src="{{ imagem.imagem.url }}" alt="{{ item.produto.nome }}" style="max-width: 100%;">
                   {% else %}
                     <img src="{{ item.produto.imagem_principal.url }}" alt="{{ item.produto.nome }}">
                   {% endif %}
@@ -31,48 +34,181 @@
                   </div>
                 </div>
               </td>
+              <td>{{ produto.marca }}</td>
+              <td>{{ produto.descricao }}</td>
               <td>R$ {{ produto.preco }}</td>
               <td>
-                <form method="POST" action="{% url 'exibir_carrinho' %}">
+                <form method="POST" id="quantidade-form-{{ item.id }}" action="{% url 'atualizar_carrinho' %}">
                   {% csrf_token %}
-                  <div class="form-group mb-0">
-                    <input type="hidden" name="item{{ item.id }}" value="{{ item.id }}">
-                    <input type="number" name="quantidade{{ item.id }}" class="form-control" value="{{ item.quantidade }}" min="1" max="{{ produto.quantidade_em_estoque }}" required oninvalid="this.setCustomValidity('Valor acima do disponível. O total em estoque é de {{produto.quantidade_em_estoque}}')" oninput="this.setCustomValidity('')">
+                  <div class="input-group mb-0">
+                    <div class="input-group-prepend">
+                      <button class="btn btn-outline-secondary quantidade-botao" type="button" data-item-id="{{ item.id }}" data-operacao="subtrair">-</button>
 
+                    </div>
+
+                    <input type="number" name="quantidade-{{ item.id }}" id="quantidade-{{ item.id }}" class="form-control text-center" value="{{ item.quantidade }}" min="1" max="{{ produto.quantidade_em_estoque }}" required>
+
+                    <div class="input-group-append">
+
+
+                      <button class="btn btn-outline-secondary quantidade-botao" type="button" data-item-id="{{ item.id }}" data-operacao="adicionar" {% if item.id == produto.quantidade_em_estoque %}disabled{% endif %}>+</button>
+
+
+
+                    </div>
                   </div>
-                  
-                  <button type="submit" class="btn btn-primary mt-2">Atualizar</button>
+                </form>
+                <form action="{% url 'remover_produto_carrinho' %}" method="POST">
+
+                  {% csrf_token %}
+                  <input type="hidden" name="item_id" value="{{ item.id }}">
+                  <button type="submit">Excluir produto</button>
+
                 </form>
               </td>
-              <td>R$ {{ item.total_item }}</td>
+              <td id="subtotal-{{ produto.id }}">R$ {{ item.total_item }}</td>
             </tr>
           {% endfor %}
           <tr>
-            <td colspan="3" class="text-right font-weight-bold">Total:</td>
-            <td class="font-weight-bold text-success">R$ {{ total_pedido }}</td>
+            <td colspan="5" class="text-right font-weight-bold">Total:</td>
+            <td class="font-weight-bold text-success" id="total">R$ {{ total_pedido }}</td>
           </tr>
         </tbody>
-        <script>
-          function getParameterByName(name) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(name);
-          }
-          
-          $(document).ready(function() {
-            console.log(getParameterByName('produto_adicionado')); // adicione essa linha
-          
-            if (getParameterByName('produto_adicionado') === 'true') {
-              console.log('Modal deveria');
-              $('#modal_produto_adicionado').modal('show');
-              history.replaceState(null, '', window.location.pathname + '?produto_adicionado=false');
-            }
-          });
-            
-        </script>
       </table>
+      <div class="text-right">
+
+    <!-- Botão para abrir a modal -->
+    {% csrf_token %}    
+
+    <button type="button" class="finalizar-pedido-btn" id="finalizar-pedido-btn" data-toggle="modal" data-target="#finalizar-pedido-modal">
+      Finalizar Pedido
+    </button>
+
+      </div>
     </div>
   </div>
-  {% include 'pedidos/modal_produto_adicionado.html' %}
+<script>
+  function getParameterByName(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+  }
+  
+    $(document).ready(function() {
+        console.log(getParameterByName('produto_adicionado')); // adicione essa linha
+    
+        if (getParameterByName('produto_adicionado') === 'true') {
+        $('#modal_produto_adicionado').modal('show');
+        history.replaceState(null, '', window.location.pathname + '?produto_adicionado=false');
+        }
+    });
+    
+document.querySelectorAll('.quantidade-botao').forEach(botao => {
+    botao.addEventListener('click', event => {
+    event.preventDefault();
 
+const campoQuantidade = document.querySelector(`#quantidade-${botao.dataset.itemId}`);
+const quantidadeAtual = parseInt(campoQuantidade.value);
+
+$(document).ready(function() {
+  // Obtém o token CSRF do cookie
+  var csrfToken = getCookie('csrftoken');
+  
+  // Adiciona o token CSRF aos dados da requisição
+  var data = {
+    'csrfmiddlewaretoken': csrfToken,
+    // Aqui você pode adicionar os outros dados do seu formulário
+  };
+
+const novaQuantidade = botao.dataset.operacao === 'adicionar' ? quantidadeAtual + 1 : quantidadeAtual - 1;
+if (novaQuantidade < 1 || novaQuantidade > parseInt(campoQuantidade.max)) {
+return;
+}
+campoQuantidade.value = novaQuantidade;
+const url = '/atualizar-carrinho/'
+const formData = new FormData();
+formData.append('quantidade{{ item.id }}', novaQuantidade);
+formData.append('item_id', botao.dataset.itemId);
+
+fetch(url, {
+method: 'POST',
+body: formData,
+headers: {
+'X-CSRFToken':  csrfToken
+}
+})
+.then(response => {
+if (response.ok) {
+return response.json();
+}
+throw new Error('Erro ao enviar dados');
+})
+.then(data => {
+console.log(data);
+location.reload(true);
+// faça algo com a resposta da view
+})
+
+})
+});
+
+
+const finalizarPedidoBtn = document.getElementById('finalizar-pedido-btn');
+
+// verificando se o carrinho está vazio
+const carrinho_vazio = document.querySelectorAll('.carrinho-item').length === 0;
+
+// verificando se o usuário está autenticado
+const usuario_autenticado = document.querySelector('.usuario-logado') !== null;
+
+finalizarPedidoBtn.addEventListener('click', () => {
+  const xhr = new XMLHttpRequest();
+
+  xhr.open('POST', '/finalizar-pedido/', true);
+  xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+
+  const csrfToken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+  const dados = JSON.stringify({
+    'carrinho_vazio': carrinho_vazio,
+    'usuario_autenticado': usuario_autenticado,
+    'csrfmiddlewaretoken': csrfToken
+  });
+
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === XMLHttpRequest.DONE) {
+      if (xhr.status === 200) {
+        const response = JSON.parse(xhr.responseText);
+        if (response.status === 'ok') {
+          // redireciona para a página de finalização de pedido
+          window.location.href = '/finalizar-pedido/';
+        } else {
+          // exibe mensagem de erro na modal
+          const modalBody = document.querySelector('.modal-body');
+          const alert = document.createElement('div');
+          alert.className = 'alert alert-danger';
+          alert.textContent = 'Não foi possível finalizar o pedido. Tente novamente mais tarde.';
+          modalBody.appendChild(alert);
+        }
+      } else {
+        // exibe mensagem de erro na modal
+        const modalBody = document.querySelector('.modal-body');
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-danger';
+        alert.textContent = 'Não foi possível finalizar o pedido. Tente novamente mais tarde.';
+        modalBody.appendChild(alert);
+      }
+    }
+  };
+
+  xhr.send(dados);
+});
+});
+
+
+</script>
+    </div>
+  </div>
+
+  {% include 'pedidos/modal_produto_adicionado.html' %}
+  {% include 'pedidos/finalize_order.html' %}
 
 {% endblock %}

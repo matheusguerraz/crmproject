@@ -20,10 +20,15 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
     
 class CustomUser(AbstractBaseUser):
+    SEXO_CHOICES = (
+        ('M', u'Masculino'),
+        ('F', u'Feminino'),
+    )
+
     email = models.EmailField(unique=True)
     name = models.CharField(max_length=100)
     date_of_birth = models.DateField()
-
+    sexo = models.CharField(max_length=1, choices=SEXO_CHOICES)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=True)
 

@@ -1,0 +1,108 @@
+/* Definindo as cores */
+:root {
+    --verde-militar: #556B2F;
+    --verde-escuro: #2E8B57;
+    --cinza-claro: #F5F5F5;
+    --cinza-escuro: #444444;
+    --preto: #000000;
+  }
+  
+  /* Título principal */
+  h1 {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 3rem;
+    color: var(--verde-militar);
+    text-align: center;
+    text-transform: uppercase;
+  }
+  
+  /* Tabela de produtos */
+  table {
+    width: 70%;
+    margin: 0 auto;
+    border-collapse: collapse;
+  }
+  
+  th,
+  td {
+    padding: 1.2rem;
+    text-align: left;
+    vertical-align: middle;
+  }
+  
+  th {
+    background-color: var(--verde-militar);
+    color: var(--cinza-claro);
+    font-size: 1.4rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: none;
+  }
+  
+  td {
+    font-size: 1.2rem;
+    color: var(--preto);
+    border-bottom: 1px solid var(--cinza-claro);
+  }
+  
+  td img {
+    max-width: 15%;
+  }
+  
+  td button {
+    background-color: var(--verde-escuro);
+    color: var(--cinza-claro);
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 5px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+  }
+  
+  td button:hover {
+    background-color: var(--verde-militar);
+  }
+  
+  /* Formulário */
+  .form-control {
+    width: 4rem;
+    display: inline-block;
+    font-size: 1.2rem;
+    text-align: center;
+    border: none;
+    border-bottom: 2px solid var(--cinza-escuro);
+    margin: 0 0.5rem;
+    padding: 0.2rem;
+  }
+  
+  .form-control:focus {
+    border-color: var(--verde-militar);
+    outline: none;
+  }
+  
+  .form-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* Botão de finalizar pedido */
+  #finalizar-pedido {
+    margin-top: 2rem;
+    text-align: center;
+  }
+  
+  #finalizar-pedido button {
+    background-color: var(--verde-militar);
+    color: var(--cinza-claro);
+    font-size: 1.4rem;
+    border: none;
+    border-radius: 5px;
+    padding: 0.8rem 2rem;
+    cursor: pointer;
+  }
+  
+  #finalizar-pedido button:hover {
+    background-color: var(--verde-escuro);
+  }  
